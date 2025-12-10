@@ -1,0 +1,60 @@
+{{define "title"}} 404{{end}} {{define "main"}}
+<main class="error-page">
+  <div class="error-container">
+    <div class="error-content">
+      <div class="error-illustration">
+        <i class="fas fa-book-dead"></i>
+      </div>
+
+      <div class="error-code">404</div>
+
+      <h1 class="error-title">Page Not Found</h1>
+
+      <p class="error-message">
+        Oops! The page you're looking for seems to have been checked out
+        permanently. It might have been removed, had its name changed, or is
+        temporarily unavailable.
+      </p>
+
+      <div class="error-suggestions">
+        <h3>Here's what you can do:</h3>
+        <ul>
+          <li><i class="fas fa-check-circle"></i> Check the URL for typos</li>
+          <li>
+            <i class="fas fa-check-circle"></i> Go back to the previous page
+          </li>
+          <li><i class="fas fa-check-circle"></i> Visit our homepage</li>
+          <li>
+            <i class="fas fa-check-circle"></i> Use the search bar to find what
+            you need
+          </li>
+        </ul>
+      </div>
+
+      <div class="error-actions">
+        <a href="/" class="btn btn-primary btn-large">
+          <i class="fas fa-home"></i>
+          Back to Home
+        </a>
+        <a href="/search" class="btn btn-secondary btn-large">
+          <i class="fas fa-search"></i>
+          Search Books
+        </a>
+      </div>
+
+      <div class="error-footer">
+        <p>
+          Need help? <a href="mailto:support@libraryms.com">Contact Support</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="error-books-float">
+      <i class="fas fa-book"></i>
+      <i class="fas fa-book-open"></i>
+      <i class="fas fa-book-reader"></i>
+      <i class="fas fa-bookmark"></i>
+    </div>
+  </div>
+</main>
+{{end}}

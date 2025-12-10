@@ -1,0 +1,119 @@
+{{define "title"}} Search {{end}} {{define "main"}}
+<main class="container">
+  <section class="search-results">
+    <h1>Search Results</h1>
+    <p class="subtitle">Showing results for "to kill"</p>
+
+    <div class="search-layout">
+      <aside class="filters-sidebar">
+        <h3>Filters</h3>
+
+        <div class="filter-group">
+          <h4>Category</h4>
+          <select class="filter-select">
+            <option>All Categories</option>
+            <option>Fiction</option>
+            <option>Non-Fiction</option>
+            <option>Science</option>
+            <option>History</option>
+            <option>Romance</option>
+            <option>Classic</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <h4>Availability</h4>
+          <select class="filter-select">
+            <option>All Books</option>
+            <option>Available</option>
+            <option>Borrowed</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <h4>Sort By</h4>
+          <select class="filter-select">
+            <option>Relevance</option>
+            <option>Title (A-Z)</option>
+            <option>Title (Z-A)</option>
+            <option>Author (A-Z)</option>
+            <option>Newest First</option>
+          </select>
+        </div>
+
+        <button class="btn btn-secondary btn-block">Clear Filters</button>
+      </aside>
+
+      <div class="search-content">
+        <p class="results-count">4 books found</p>
+
+        <div class="books-grid">
+          <div class="book-card">
+            <div class="book-image">
+              <img
+                src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=400&fit=crop"
+                alt="Book"
+              />
+              <span class="status-badge available">Available</span>
+            </div>
+            <div class="book-info">
+              <span class="book-category">Classic</span>
+              <h3 class="book-title">To Kill a Mockingbird</h3>
+              <p class="book-author">by Harper Lee</p>
+              <button class="btn btn-primary">View Details</button>
+            </div>
+          </div>
+
+          <div class="book-card">
+            <div class="book-image">
+              <img
+                src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop"
+                alt="Book"
+              />
+              <span class="status-badge available">Available</span>
+            </div>
+            <div class="book-info">
+              <span class="book-category">Fiction</span>
+              <h3 class="book-title">Kill Bill: A Novel</h3>
+              <p class="book-author">by John Smith</p>
+              <button class="btn btn-primary">View Details</button>
+            </div>
+          </div>
+
+          <div class="book-card">
+            <div class="book-image">
+              <img
+                src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop"
+                alt="Book"
+              />
+              <span class="status-badge borrowed">Borrowed</span>
+            </div>
+            <div class="book-info">
+              <span class="book-category">Romance</span>
+              <h3 class="book-title">Love Kills</h3>
+              <p class="book-author">by Jane Doe</p>
+              <button class="btn btn-primary">View Details</button>
+            </div>
+          </div>
+
+          <div class="book-card">
+            <div class="book-image">
+              <img
+                src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=300&h=400&fit=crop"
+                alt="Book"
+              />
+              <span class="status-badge available">Available</span>
+            </div>
+            <div class="book-info">
+              <span class="book-category">Thriller</span>
+              <h3 class="book-title">Killing Time</h3>
+              <p class="book-author">by Robert Johnson</p>
+              <button class="btn btn-primary">View Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{{end}}

@@ -1,0 +1,77 @@
+{{define "title"}}Profile{{end}} {{define "main"}}
+<main class="container">
+  <div class="profile-layout">
+    <aside class="profile-sidebar">
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <h2 class="profile-name">John Doe</h2>
+        <p class="profile-email">john.doe@university.edu</p>
+        <p class="profile-id">Member ID: LIB2024001</p>
+
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-label">Member Since</span>
+            <span class="stat-value">January 2024</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Active Borrows</span>
+            <span class="stat-value">2</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Total Borrowed</span>
+            <span class="stat-value">15</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="profile-content">
+      <div class="profile-tabs">
+        <button class="tab active">Borrowed Books</button>
+        <button class="tab">History</button>
+        <button class="tab">Edit Profile</button>
+      </div>
+
+      <div class="tab-content">
+        <h2><i class="fas fa-book"></i> Currently Borrowed (2)</h2>
+
+        <div class="borrowed-books">
+          <div class="borrowed-item">
+            <img
+              src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&h=200&fit=crop"
+              alt="Book"
+            />
+            <div class="borrowed-info">
+              <h3>To Kill a Mockingbird</h3>
+              <p class="author">by Harper Lee</p>
+              <p class="date-info">
+                <span>Borrowed: 11/10/2024</span>
+                <span class="due-date">Due: 12/10/2024</span>
+              </p>
+              <button class="btn btn-dark">Return Book</button>
+            </div>
+          </div>
+
+          <div class="borrowed-item">
+            <img
+              src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=150&h=200&fit=crop"
+              alt="Book"
+            />
+            <div class="borrowed-info">
+              <h3>1984</h3>
+              <p class="author">by George Orwell</p>
+              <p class="date-info">
+                <span>Borrowed: 11/15/2024</span>
+                <span class="due-date">Due: 12/15/2024</span>
+              </p>
+              <button class="btn btn-dark">Return Book</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{{end}}

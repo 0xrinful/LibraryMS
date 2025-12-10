@@ -1,0 +1,151 @@
+{{define "title"}} Dashboard{{end}} {{define "main"}}
+<main class="container">
+  <section class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <p class="subtitle">Manage your library system</p>
+  </section>
+
+  <section class="stats-grid">
+    <div class="stat-card blue">
+      <div class="stat-icon">
+        <i class="fas fa-book"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Total Books</h3>
+        <p class="stat-number">1,234</p>
+      </div>
+      <span class="stat-change positive">+12%</span>
+    </div>
+
+    <div class="stat-card green">
+      <div class="stat-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Active Members</h3>
+        <p class="stat-number">456</p>
+      </div>
+      <span class="stat-change positive">+8%</span>
+    </div>
+
+    <div class="stat-card purple">
+      <div class="stat-icon">
+        <i class="fas fa-arrow-up"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Books Borrowed</h3>
+        <p class="stat-number">89</p>
+      </div>
+      <span class="stat-change positive">+23%</span>
+    </div>
+
+    <div class="stat-card red">
+      <div class="stat-icon">
+        <i class="fas fa-exclamation-circle"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Overdue Books</h3>
+        <p class="stat-number">12</p>
+      </div>
+      <span class="stat-change negative">-5%</span>
+    </div>
+  </section>
+
+  <section class="dashboard-tabs">
+    <div class="tabs">
+      <button class="tab active">Book Management</button>
+      <button class="tab">Member Management</button>
+      <button class="tab">System Settings</button>
+    </div>
+
+    <div class="tab-content">
+      <div class="content-header">
+        <h2>Books</h2>
+        <div>
+          <button class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Add New Book
+          </button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Author</th>
+              <th>ISBN</th>
+              <th>Status</th>
+              <th>Copies</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>To Kill a Mockingbird</td>
+              <td>Harper Lee</td>
+              <td>978-0061120084</td>
+              <td><span class="status-badge available">Available</span></td>
+              <td>3</td>
+              <td class="actions">
+                <button class="icon-btn edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="icon-btn delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>1984</td>
+              <td>George Orwell</td>
+              <td>978-0451524935</td>
+              <td><span class="status-badge available">Available</span></td>
+              <td>5</td>
+              <td class="actions">
+                <button class="icon-btn edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="icon-btn delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Pride and Prejudice</td>
+              <td>Jane Austen</td>
+              <td>978-0141439518</td>
+              <td><span class="status-badge borrowed">Borrowed</span></td>
+              <td>0</td>
+              <td class="actions">
+                <button class="icon-btn edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="icon-btn delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>The Great Gatsby</td>
+              <td>F. Scott Fitzgerald</td>
+              <td>978-0743273565</td>
+              <td><span class="status-badge available">Available</span></td>
+              <td>2</td>
+              <td class="actions">
+                <button class="icon-btn edit">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="icon-btn delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+{{end}}

@@ -1,0 +1,43 @@
+{{define "base"}}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LibraryMS - {{template "title" .}}</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    {{if .DisplayNav}}
+    <nav class="navbar">
+      <div class="nav-brand">
+        <div class="logo">
+          <i class="fas fa-book"></i>
+        </div>
+        <a href="/">
+          <span class="brand-name">LibraryMS</span>
+        </a>
+      </div>
+      <div class="nav-search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search books..." />
+      </div>
+      <div class="nav-links">
+        <a href="/profile" class="nav-link">
+          <i class="fas fa-user"></i>
+          Profile
+        </a>
+        <a href="login.html" class="nav-link">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </div>
+    </nav>
+    {{end}} {{template "main" .}}
+  </body>
+</html>
+{{end}}

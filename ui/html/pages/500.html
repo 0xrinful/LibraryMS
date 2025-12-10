@@ -1,0 +1,79 @@
+{{define "title"}} 500{{end}} {{define "main"}}
+<main class="error-page">
+  <div class="error-container">
+    <div class="error-content">
+      <div class="error-illustration server-error">
+        <i class="fas fa-server"></i>
+        <i class="fas fa-exclamation-triangle error-icon-overlay"></i>
+      </div>
+
+      <div class="error-code error-500">500</div>
+
+      <h1 class="error-title">Internal Server Error</h1>
+
+      <p class="error-message">
+        Something went wrong on our end. Our librarians (developers) have been
+        notified and are working hard to fix the issue. Please try again in a
+        few moments.
+      </p>
+
+      <div class="error-suggestions">
+        <h3>What happened?</h3>
+        <ul>
+          <li>
+            <i class="fas fa-info-circle"></i> The server encountered an
+            unexpected condition
+          </li>
+          <li>
+            <i class="fas fa-info-circle"></i> Our team has been automatically
+            notified
+          </li>
+          <li>
+            <i class="fas fa-info-circle"></i> We're working to resolve this as
+            quickly as possible
+          </li>
+        </ul>
+      </div>
+
+      <div class="error-suggestions">
+        <h3>What you can try:</h3>
+        <ul>
+          <li><i class="fas fa-redo"></i> Refresh the page</li>
+          <li><i class="fas fa-clock"></i> Wait a few minutes and try again</li>
+          <li><i class="fas fa-home"></i> Return to the homepage</li>
+          <li>
+            <i class="fas fa-envelope"></i> Contact support if the problem
+            persists
+          </li>
+        </ul>
+      </div>
+
+      <div class="error-actions">
+        <button onclick="location.reload()" class="btn btn-primary btn-large">
+          <i class="fas fa-sync-alt"></i>
+          Refresh Page
+        </button>
+        <a href="/" class="btn btn-secondary btn-large">
+          <i class="fas fa-home"></i>
+          Back to Home
+        </a>
+      </div>
+
+      <div class="error-footer">
+        <p>
+          Error persisting?
+          <a href="mailto:support@libraryms.com">Report this issue</a>
+        </p>
+        <p class="error-id">Error ID: #ERR-500-2024-12-10-19:58</p>
+      </div>
+    </div>
+
+    <div class="error-books-float server-float">
+      <i class="fas fa-cog fa-spin"></i>
+      <i class="fas fa-tools"></i>
+      <i class="fas fa-wrench"></i>
+      <i class="fas fa-hammer"></i>
+    </div>
+  </div>
+</main>
+{{end}}

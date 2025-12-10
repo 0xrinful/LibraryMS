@@ -1,0 +1,205 @@
+{{define "title"}} Book {{end}} {{define "main"}}
+<main class="container">
+  <div class="breadcrumb">
+    <a href="/"><i class="fas fa-home"></i> Home</a>
+    <span class="separator">/</span>
+    <a href="/search">Search</a>
+    <span class="separator">/</span>
+    <span class="current">To Kill a Mockingbird</span>
+  </div>
+
+  <div class="book-details-layout">
+    <div class="book-main-image">
+      <img
+        src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop"
+        alt="To Kill a Mockingbird"
+      />
+      <div class="image-actions">
+        <button class="icon-btn-large">
+          <i class="fas fa-heart"></i>
+        </button>
+        <button class="icon-btn-large">
+          <i class="fas fa-share-alt"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="book-details-content">
+      <div class="book-header">
+        <span class="book-category">Classic Literature</span>
+        <span class="status-badge available">Available</span>
+      </div>
+
+      <h1 class="book-details-title">To Kill a Mockingbird</h1>
+      <p class="book-details-author">by Harper Lee</p>
+
+      <div class="book-rating">
+        <div class="stars">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star-half-alt"></i>
+        </div>
+        <span class="rating-text">4.5 (2,847 reviews)</span>
+      </div>
+
+      <div class="book-meta">
+        <div class="meta-item">
+          <i class="fas fa-barcode"></i>
+          <div>
+            <span class="meta-label">ISBN</span>
+            <span class="meta-value">978-0061120084</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-calendar"></i>
+          <div>
+            <span class="meta-label">Published</span>
+            <span class="meta-value">July 11, 1960</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-file-alt"></i>
+          <div>
+            <span class="meta-label">Pages</span>
+            <span class="meta-value">324</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-language"></i>
+          <div>
+            <span class="meta-label">Language</span>
+            <span class="meta-value">English</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-building"></i>
+          <div>
+            <span class="meta-label">Publisher</span>
+            <span class="meta-value">HarperCollins</span>
+          </div>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-copy"></i>
+          <div>
+            <span class="meta-label">Available Copies</span>
+            <span class="meta-value">3 of 5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-actions">
+        <button class="btn btn-primary btn-large">
+          <i class="fas fa-book-reader"></i>
+          Borrow Book
+        </button>
+        <button class="btn btn-secondary btn-large">
+          <i class="fas fa-bookmark"></i>
+          Add to Wishlist
+        </button>
+      </div>
+
+      <div class="book-description">
+        <h3>Description</h3>
+        <p>
+          "To Kill a Mockingbird" is a novel by Harper Lee published in 1960. It
+          was immediately successful, winning the Pulitzer Prize, and has become
+          a classic of modern American literature. The plot and characters are
+          loosely based on Lee's observations of her family, her neighbors and
+          an event that occurred near her hometown of Monroeville, Alabama, in
+          1936, when she was 10 years old.
+        </p>
+        <p>
+          The story takes place during three years (1933–35) of the Great
+          Depression in the fictional "tired old town" of Maycomb, Alabama, the
+          seat of Maycomb County. It focuses on six-year-old Jean Louise Finch
+          (nicknamed Scout), who lives with her older brother Jeremy (nicknamed
+          Jem) and their widowed father Atticus, a middle-aged lawyer.
+        </p>
+      </div>
+
+      <div class="book-tags">
+        <h3>Tags</h3>
+        <div class="tags-list">
+          <span class="tag">Classic</span>
+          <span class="tag">American Literature</span>
+          <span class="tag">Fiction</span>
+          <span class="tag">Coming of Age</span>
+          <span class="tag">Historical</span>
+          <span class="tag">Legal Drama</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="related-books">
+    <h2>Related Books</h2>
+    <div class="books-grid">
+      <div class="book-card">
+        <div class="book-image">
+          <img
+            src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop"
+            alt="Book"
+          />
+          <span class="status-badge available">Available</span>
+        </div>
+        <div class="book-info">
+          <span class="book-category">Fiction</span>
+          <h3 class="book-title">1984</h3>
+          <p class="book-author">by George Orwell</p>
+          <button class="btn btn-primary">View Details</button>
+        </div>
+      </div>
+
+      <div class="book-card">
+        <div class="book-image">
+          <img
+            src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=300&h=400&fit=crop"
+            alt="Book"
+          />
+          <span class="status-badge available">Available</span>
+        </div>
+        <div class="book-info">
+          <span class="book-category">Fiction</span>
+          <h3 class="book-title">The Great Gatsby</h3>
+          <p class="book-author">by F. Scott Fitzgerald</p>
+          <button class="btn btn-primary">View Details</button>
+        </div>
+      </div>
+
+      <div class="book-card">
+        <div class="book-image">
+          <img
+            src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop"
+            alt="Book"
+          />
+          <span class="status-badge borrowed">Borrowed</span>
+        </div>
+        <div class="book-info">
+          <span class="book-category">Romance</span>
+          <h3 class="book-title">Pride and Prejudice</h3>
+          <p class="book-author">by Jane Austen</p>
+          <button class="btn btn-primary">View Details</button>
+        </div>
+      </div>
+
+      <div class="book-card">
+        <div class="book-image">
+          <img
+            src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop"
+            alt="Book"
+          />
+          <span class="status-badge available">Available</span>
+        </div>
+        <div class="book-info">
+          <span class="book-category">Classic</span>
+          <h3 class="book-title">The Catcher in the Rye</h3>
+          <p class="book-author">by J.D. Salinger</p>
+          <button class="btn btn-primary">View Details</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{{end}}
