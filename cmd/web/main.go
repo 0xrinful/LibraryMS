@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"flag"
+	"html/template"
 	"os"
 	"time"
 
 	_ "github.com/lib/pq"
 
+	"github.com/0xrinful/LibraryMS/internal/data"
 	"github.com/0xrinful/LibraryMS/internal/logger"
 )
 
@@ -23,8 +25,10 @@ type config struct {
 }
 
 type application struct {
-	config config
-	logger *logger.Logger
+	config        config
+	logger        *logger.Logger
+	models        data.Models
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -35,10 +39,19 @@ func main() {
 	if err != nil {
 		logger.PrintFatal(err)
 	}
+	defer db.Close()
+	logger.PrintInfo("database connection pool established")
+
+	cache, err := newTemplateCache()
+	if err != nil {
+		logger.PrintFatal(err)
+	}
 
 	app := &application{
-		config: cfg,
-		logger: logger,
+		config:        cfg,
+		logger:        logger,
+		models:        data.NewModels(db),
+		templateCache: cache,
 	}
 
 	err = app.serve()
