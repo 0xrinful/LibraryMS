@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS books (
   publish_date DATE NOT NULL,
   isbn VARCHAR(17) UNIQUE NOT NULL,
   description text NOT NULL,
+  cover_image text NOT NULL,
+  genres text[] NOT NULL,
   copies_total integer NOT NULL DEFAULT 1,
   copies_available integer NOT NULL DEFAULT 1,
   version integer NOT NULL DEFAULT 1
