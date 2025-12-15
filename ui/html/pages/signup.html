@@ -10,44 +10,66 @@
       <h1 class="auth-title">Create Account</h1>
       <p class="auth-subtitle">Sign up to start borrowing books</p>
 
-      <form class="auth-form">
+      <form class="auth-form" method="POST" action="/signup">
         <div class="form-group">
-          <label for="fullname">Full Name</label>
+          <label for="fullname"
+            ><span>Full Name</span>
+            <span class="field-error">{{.Form.Errors.name}}</span></label
+          >
           <input
             type="text"
             id="fullname"
+            name="name"
             placeholder="Enter your full name"
             required
+            value="{{.Form.Name}}"
           />
         </div>
 
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email"
+            ><span>Email</span
+            ><span class="field-error">{{.Form.Errors.email}}</span></label
+          >
           <input
             type="email"
             id="email"
+            name="email"
             placeholder="Enter your email"
             required
+            value="{{.Form.Email}}"
           />
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password"
+            ><span>Password</span
+            ><span class="field-error">{{.Form.Errors.password}}</span></label
+          >
           <input
             type="password"
             id="password"
+            name="password"
             placeholder="Create a password"
             required
+            value="{{.Form.Password}}"
           />
         </div>
 
         <div class="form-group">
-          <label for="confirm-password">Confirm Password</label>
+          <label for="confirm-password"
+            ><span>Confirm Password</span>
+            <span class="field-error"
+              >{{.Form.Errors.confirm_password}}</span
+            ></label
+          >
           <input
             type="password"
             id="confirm-password"
+            name="confirm_password"
             placeholder="Confirm your password"
             required
+            value="{{.Form.ConfirmPassword}}"
           />
         </div>
 
@@ -55,8 +77,8 @@
       </form>
 
       <div class="auth-footer">
-        <p>Already have an account? <a href="login.html">Login</a></p>
-        <a href="home.html" class="back-link">Back to Home</a>
+        <p>Already have an account? <a href="/login">Login</a></p>
+        <a href="/" class="back-link">Back to Home</a>
       </div>
     </div>
   </div>
