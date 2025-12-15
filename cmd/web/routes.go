@@ -18,7 +18,10 @@ func (app *application) routes() http.Handler {
 	r.Get("/", app.home)
 	r.Get("/profile", app.profile)
 	r.Get("/dashboard", app.dashboard)
+
 	r.Get("/signup", app.signup)
+	r.Post("/signup", app.signupPost)
+
 	r.Get("/login", app.login)
 	r.Get("/search", app.search)
 	r.Get("/book", app.displayBook)

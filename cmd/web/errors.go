@@ -26,3 +26,7 @@ func (app *application) serverError(w http.ResponseWriter, err error) {
 func (app *application) notFound(w http.ResponseWriter, r *http.Request) {
 	app.render(w, 404, "404.html", &templateData{DisplayNav: false})
 }
+
+func (app *application) badRequest(w http.ResponseWriter, r *http.Request) {
+	app.render(w, 400, "400.html", &templateData{DisplayNav: false})
+}

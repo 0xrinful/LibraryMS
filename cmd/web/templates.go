@@ -10,6 +10,7 @@ import (
 
 type templateData struct {
 	DisplayNav bool
+	Form       any
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
