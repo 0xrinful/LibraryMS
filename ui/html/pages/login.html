@@ -10,30 +10,49 @@
       <h1 class="auth-title">Welcome Back</h1>
       <p class="auth-subtitle">Login to access your library account</p>
 
-      <form class="auth-form">
+      <form class="auth-form" method="POST" action="/login">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="email"
+            ><span>Email</span>
+            <span class="field-error">{{.Form.Errors.email}}</span></label
+          >
           <input
             type="email"
             id="email"
             placeholder="Enter your email"
+            name="email"
             required
+            value="{{.Form.Email}}"
           />
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
+          <label for="password"
+            ><span>Password</span
+            ><span class="field-error">{{.Form.Errors.password}}</span></label
+          >
           <input
             type="password"
             id="password"
             placeholder="Enter your password"
+            name="password"
             required
+            value="{{.Form.Password}}"
           />
         </div>
 
         <div class="form-options">
           <label class="checkbox-label">
-            <input type="checkbox" />
+            <input
+              type="checkbox"
+              name="remember"
+              value="1"
+              {{if
+              .Form.RememberMe
+              }}
+              checked
+              {{end}}
+            />
             <span>Remember me</span>
           </label>
         </div>

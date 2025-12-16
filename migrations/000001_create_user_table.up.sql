@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
   name text NOT NULL,
   email citext UNIQUE NOT NULL,
   password_hash bytea NOT NULL,
-  activated bool NOT NULL DEFAULT FALSE,
+  activated bool NOT NULL DEFAULT false,
   avatar_url text,
   role text NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   version integer NOT NULL DEFAULT 1

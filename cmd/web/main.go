@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"flag"
 	"html/template"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	_ "github.com/lib/pq"
 
 	"github.com/0xrinful/LibraryMS/internal/data"
@@ -29,6 +31,7 @@ type application struct {
 	logger        *logger.Logger
 	models        data.Models
 	templateCache map[string]*template.Template
+	session       *scs.SessionManager
 }
 
 func main() {
@@ -47,11 +50,18 @@ func main() {
 		logger.PrintFatal(err)
 	}
 
+	sessionManager := scs.New()
+	sessionManager.Lifetime = 12 * time.Hour
+	sessionManager.Cookie.HttpOnly = true
+	sessionManager.Cookie.SameSite = http.SameSiteLaxMode
+	sessionManager.Cookie.Secure = false
+
 	app := &application{
 		config:        cfg,
 		logger:        logger,
 		models:        data.NewModels(db),
 		templateCache: cache,
+		session:       sessionManager,
 	}
 
 	err = app.serve()

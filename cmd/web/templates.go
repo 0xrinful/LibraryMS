@@ -5,12 +5,15 @@ import (
 	"io/fs"
 	"path/filepath"
 
+	"github.com/0xrinful/LibraryMS/internal/data"
 	"github.com/0xrinful/LibraryMS/ui"
 )
 
 type templateData struct {
-	DisplayNav bool
-	Form       any
+	DisplayNav      bool
+	Form            any
+	IsAuthenticated bool
+	User            *data.User
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

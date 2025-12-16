@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/0xrinful/LibraryMS/internal/data"
 )
 
 func (app *application) render(w http.ResponseWriter, status int, page string, data *templateData) {
@@ -19,4 +21,23 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 	if err != nil {
 		app.serverError(w, err)
 	}
+}
+
+func (app *application) isAuthenticated(r *http.Request) bool {
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedContextKey).(bool)
+	return ok && isAuthenticated
+}
+
+func (app *application) newTemplateData(r *http.Request) *templateData {
+	td := &templateData{
+		IsAuthenticated: app.isAuthenticated(r),
+		DisplayNav:      true,
+	}
+
+	user, ok := r.Context().Value(userContextKey).(*data.User)
+	if ok {
+		td.User = user
+	}
+
+	return td
 }

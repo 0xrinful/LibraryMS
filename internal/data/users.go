@@ -20,7 +20,7 @@ type User struct {
 	Email     string
 	Password  password
 	Activated bool
-	AvatarUrl string
+	AvatarUrl *string
 	Role      string
 	Version   int
 }
@@ -66,7 +66,7 @@ func (m UserModel) Insert(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []any{user.Name, user.Email, user.Password}
+	args := []any{user.Name, user.Email, user.Password.hash}
 	_, err := m.DB.ExecContext(ctx, query, args...)
 	if err != nil {
 		switch {
@@ -107,6 +107,41 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 			return nil, err
 		}
 	}
+	return &user, nil
+}
+
+func (m UserModel) Get(id int) (*User, error) {
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+
+	query := `
+		SELECT id, created_at, name, email, password_hash, role
+		FROM users
+		WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var user User
+
+	err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Role,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
 	return &user, nil
 }
 

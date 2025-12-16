@@ -1,9 +1,19 @@
 package data
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+)
+
+var ErrRecordNotFound = errors.New("models: record not found")
 
 type Models struct {
-	Users interface{}
+	Users interface {
+		Insert(user *User) error
+		GetByEmail(email string) (*User, error)
+		Get(id int) (*User, error)
+	}
+
 	Books interface{}
 }
 
