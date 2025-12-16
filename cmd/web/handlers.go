@@ -3,13 +3,25 @@ package main
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/0xrinful/LibraryMS/internal/data"
 	"github.com/0xrinful/LibraryMS/internal/validator"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
+	page := 1
+	limit := 4
+	offset := (page - 1) * limit
+
+	books, err := app.models.Books.GetBooks(limit, offset)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	data := app.newTemplateData(r)
+	data.Books = books
 	app.render(w, 200, "home.html", data)
 }
 
@@ -187,8 +199,28 @@ func (app *application) search(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) displayBook(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		app.notFound(w, r)
+		return
+	}
+
+	book, err := app.models.Books.GetBookByID(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFound(w, r)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
 	data := app.newTemplateData(r)
-	app.render(w, 200, "book.html", data)
+	data.Book = book
+
+	app.render(w, http.StatusOK, "book.html", data)
 }
 
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {
@@ -200,4 +232,27 @@ func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 
 	app.session.Remove(r.Context(), "authenticatedUserID")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) booksFragment(w http.ResponseWriter, r *http.Request) {
+	page := 1
+	limit := 4
+
+	if p := r.URL.Query().Get("page"); p != "" {
+		page, _ = strconv.Atoi(p)
+		if page < 1 {
+			page = 1
+		}
+	}
+	offset := (page - 1) * limit
+
+	books, err := app.models.Books.GetBooks(limit, offset)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Books = books
+	app.renderPartial(w, "book_cards.html", data)
 }

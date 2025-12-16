@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/0xrinful/LibraryMS/internal/data"
 )
@@ -18,6 +19,26 @@ func (app *application) render(w http.ResponseWriter, status int, page string, d
 	w.WriteHeader(status)
 
 	err := ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
+}
+
+func (app *application) renderPartial(
+	w http.ResponseWriter,
+	templateName string,
+	data *templateData,
+) {
+	ts, ok := app.templateCache[templateName]
+	if !ok {
+		err := fmt.Errorf("the template %s does not exist", templateName)
+		app.serverError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	name := templateName[:len(templateName)-len(filepath.Ext(templateName))]
+	err := ts.ExecuteTemplate(w, name, data)
 	if err != nil {
 		app.serverError(w, err)
 	}

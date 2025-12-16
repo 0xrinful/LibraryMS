@@ -14,6 +14,8 @@ type templateData struct {
 	Form            any
 	IsAuthenticated bool
 	User            *data.User
+	Book            *data.Book
+	Books           []*data.Book
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
@@ -29,6 +31,7 @@ func newTemplateCache() (map[string]*template.Template, error) {
 
 		patterns := []string{
 			"html/base.html",
+			"html/partials/*.html",
 			page,
 		}
 
@@ -37,6 +40,20 @@ func newTemplateCache() (map[string]*template.Template, error) {
 			return nil, err
 		}
 
+		cache[name] = ts
+	}
+
+	partials, err := fs.Glob(ui.Files, "html/partials/*.html")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, partial := range partials {
+		name := filepath.Base(partial)
+		ts, err := template.New(name).ParseFS(ui.Files, partial)
+		if err != nil {
+			return nil, err
+		}
 		cache[name] = ts
 	}
 

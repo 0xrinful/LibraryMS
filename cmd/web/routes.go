@@ -29,7 +29,8 @@ func (app *application) routes() http.Handler {
 	r.Get("/logout", app.logout)
 
 	r.Get("/search", app.search)
-	r.Get("/book", app.displayBook)
+	r.Get("/book/{id}", app.displayBook)
+	r.Get("/books", app.booksFragment)
 
 	r.Group(func(r *rush.Router) {
 		r.Use(app.requireAuthentication)
