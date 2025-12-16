@@ -1,0 +1,20 @@
+{{define "book_cards"}} {{range .Books}}
+<div class="book-card">
+  <div class="book-image">
+    <img src="{{.CoverImage}}" alt="Book" />
+    {{if eq .CopiesAvailable 0}}
+    <span class="status-badge status-badge-abs borrowed">Borrowed</span>
+    {{else}}
+    <span class="status-badge status-badge-abs available">Available</span>
+    {{end}}
+  </div>
+  <div class="book-info">
+    {{range .Genres}}
+    <span class="book-category">{{.}}</span>
+    {{end}}
+    <h3 class="book-title">{{.Title}}</h3>
+    <p class="book-author">by {{.Author}}</p>
+    <a href="/book/{{.ID}}" class="btn btn-primary">View Details</a>
+  </div>
+</div>
+{{end}} {{end}}

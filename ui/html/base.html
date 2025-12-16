@@ -22,11 +22,18 @@
           <span class="brand-name">LibraryMS</span>
         </a>
       </div>
+
       <div class="nav-search">
         <i class="fas fa-search"></i>
         <input type="text" placeholder="Search books..." />
       </div>
+
       <div class="nav-links">
+        {{if .IsAuthenticated}}
+        <a href="/dashboard" class="nav-link">
+          <i class="fas fa-tachometer-alt"></i>
+          Dashboard
+        </a>
         <a href="/profile" class="nav-link">
           <i class="fas fa-user"></i>
           Profile
@@ -35,6 +42,16 @@
           <i class="fas fa-sign-out-alt"></i>
           Logout
         </a>
+        {{else}}
+        <a href="/login" class="nav-link">
+          <i class="fas fa-sign-in-alt"></i>
+          Login
+        </a>
+        <a href="/signup" class="nav-link">
+          <i class="fas fa-user-plus"></i>
+          Signup
+        </a>
+        {{end}}
       </div>
     </nav>
     {{end}} {{template "main" .}}
