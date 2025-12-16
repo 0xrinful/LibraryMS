@@ -14,7 +14,10 @@ type Models struct {
 		Get(id int) (*User, error)
 	}
 
-	Books interface{}
+	Books interface {
+		GetBooks(limit, offset int) ([]*Book, error)
+		GetBookByID(id int) (*Book, error)
+	}
 }
 
 func NewModels(db *sql.DB) Models {
