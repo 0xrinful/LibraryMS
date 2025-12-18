@@ -111,7 +111,7 @@ func (m BookModel) GetBookByID(id int) (*Book, error) {
 	return &b, nil
 }
 
-func (m BookModel) BorrowBook(userID, bookID int64) error {
+func (m BookModel) BorrowBook(userID, bookID int64, days int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -138,9 +138,9 @@ func (m BookModel) BorrowBook(userID, bookID int64) error {
 	}
 
 	_, err = tx.ExecContext(ctx, `
-		INSERT INTO borrow_records (user_id, book_id)
-		VALUES ($1, $2)
-	`, userID, bookID)
+		INSERT INTO borrow_records (user_id, book_id, due_at)
+		VALUES ($1, $2, NOW() + ($3 || ' days')::interval)
+	`, userID, bookID, days)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			return ErrAlreadyBorrowed
