@@ -22,9 +22,8 @@ type Models struct {
 	}
 
 	BorrowRecord interface {
-		CurrentByUser(userID int64) ([]*BorrowedBook, error)
-		ActiveCountByUser(userID int64) (int, error)
-		TotalCountByUser(userID int64) (int, error)
+		GetCurrentBorrows(userID int64) ([]*BorrowedBook, error)
+		GetBorrowHistory(userID int64) ([]*BorrowedBook, error)
 	}
 }
 

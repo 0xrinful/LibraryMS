@@ -20,6 +20,7 @@ type templateData struct {
 	Books           []*data.Book
 
 	CurrentBorrows []*data.BorrowedBook
+	BorrowHistory  []*data.BorrowedBook
 	ActiveBorrows  int
 	TotalBorrowed  int
 }

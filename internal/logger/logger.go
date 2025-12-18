@@ -49,7 +49,7 @@ func (l *Logger) PrintInfo(message string) {
 }
 
 func (l *Logger) PrintError(err error) {
-	l.print(LevelInfo, err.Error())
+	l.print(LevelError, err.Error())
 }
 
 func (l *Logger) PrintFatal(err error) {

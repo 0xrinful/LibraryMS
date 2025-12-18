@@ -12,9 +12,9 @@
         <div class="profile-stats">
           <div class="stat-item">
             <span class="stat-label">Member Since</span>
-            <span class="stat-value">
-              {{.User.CreatedAt.Format "January 2006"}}
-            </span>
+            <span class="stat-value"
+              >{{.User.CreatedAt.Format "January 2006"}}</span
+            >
           </div>
 
           <div class="stat-item">
@@ -32,44 +32,107 @@
 
     <div class="profile-content">
       <div class="profile-tabs">
-        <button class="tab active">Borrowed Books</button>
-        <button class="tab">History</button>
-        <button class="tab">Edit Profile</button>
+        <button class="tab active" data-target="borrowed">
+          Borrowed Books
+        </button>
+        <button class="tab" data-target="history">History</button>
       </div>
 
       <div class="tab-content">
-        <h2>
-          <i class="fas fa-book"></i>
-          Currently Borrowed ({{len .CurrentBorrows}})
-        </h2>
-
-        <div class="borrowed-books">
-          {{range .CurrentBorrows}}
-          <div class="borrowed-item">
-            <img src="{{.CoverImage}}" alt="{{.Title}}" />
-
-            <div class="borrowed-info">
-              <h3>{{.Title}}</h3>
-              <p class="author">by {{.Author}}</p>
-
-              <p class="date-info">
-                <span>Borrowed: {{.BorrowedAt.Format "02 Jan 2006"}}</span>
-                <span class="due-date"
-                  >Due: {{.DueAt.Format "02 Jan 2006"}}</span
-                >
-              </p>
-
-              <form method="POST" action="/books/{{.BookID}}/return">
-                <button class="btn btn-dark">Return Book</button>
-              </form>
+        <!-- Borrowed Books Tab -->
+        <div id="borrowed" class="tab-panel active">
+          <h2>
+            <i class="fas fa-book"></i> Currently Borrowed ({{len
+            .CurrentBorrows}})
+          </h2>
+          <div class="borrowed-books">
+            {{range .CurrentBorrows}}
+            <div class="borrowed-item">
+              <img src="{{.CoverImage}}" alt="{{.Title}}" />
+              <div class="borrowed-info">
+                <h3>{{.Title}}</h3>
+                <p class="author">by {{.Author}}</p>
+                <p class="date-info">
+                  <span>Borrowed: {{.BorrowedAt.Format "02 Jan 2006"}}</span>
+                  <span class="due-date"
+                    >Due: {{.DueAt.Format "02 Jan 2006"}}</span
+                  >
+                </p>
+                <form method="POST" action="/books/{{.BookID}}/return">
+                  <button class="btn btn-dark">Return Book</button>
+                </form>
+              </div>
             </div>
+            {{else}}
+            <p>No active borrowed books.</p>
+            {{end}}
           </div>
-          {{else}}
-          <p>No active borrowed books.</p>
-          {{end}}
+        </div>
+
+        <!-- History Tab -->
+        <div id="history" class="tab-panel">
+          <h2>
+            <i class="fas fa-history"></i> Borrowing History ({{len
+            .BorrowHistory}})
+          </h2>
+          <div class="borrowed-books">
+            {{range .BorrowHistory}}
+            <div class="borrowed-item">
+              <img src="{{.CoverImage}}" alt="{{.Title}}" />
+              <div class="borrowed-info">
+                <h3>{{.Title}}</h3>
+                <p class="author">by {{.Author}}</p>
+                <p class="date-info">
+                  <span>Borrowed: {{.BorrowedAt.Format "02 Jan 2006"}}</span>
+                  {{if .ReturnedAt}}
+                  <span>Returned: {{.ReturnedAt.Format "02 Jan 2006"}}</span>
+                  {{end}}
+                </p>
+              </div>
+            </div>
+            {{else}}
+            <p>No borrowing history.</p>
+            {{end}}
+          </div>
         </div>
       </div>
     </div>
   </div>
 </main>
+
+<script>
+  const tabs = document.querySelectorAll(".profile-tabs .tab");
+  const panels = document.querySelectorAll(".tab-panel");
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      // Toggle active class on tabs
+      tabs.forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      // Toggle panels
+      const target = tab.dataset.target;
+      panels.forEach((panel) => {
+        if (panel.id === target) {
+          panel.classList.add("active");
+        } else {
+          panel.classList.remove("active");
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .tab-panel {
+    display: none;
+  }
+  .tab-panel.active {
+    display: block;
+  }
+
+  .profile-tabs .tab.active {
+    background: rgb(142 159 210 / 5%);
+  }
+</style>
 {{end}}

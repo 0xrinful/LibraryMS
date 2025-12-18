@@ -28,29 +28,24 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
-
 	userID := data.User.ID
-	currentBorrows, err := app.models.BorrowRecord.CurrentByUser(userID)
+
+	current, err := app.models.BorrowRecord.GetCurrentBorrows(userID)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
+	data.CurrentBorrows = current
+	data.ActiveBorrows = len(current)
 
-	activeCount, err := app.models.BorrowRecord.ActiveCountByUser(userID)
+	history, err := app.models.BorrowRecord.GetBorrowHistory(userID)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
+	data.BorrowHistory = history
+	data.TotalBorrowed = len(current) + len(history)
 
-	totalCount, err := app.models.BorrowRecord.TotalCountByUser(userID)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data.CurrentBorrows = currentBorrows
-	data.ActiveBorrows = activeCount
-	data.TotalBorrowed = totalCount
 	app.render(w, 200, "profile.html", data)
 }
 
