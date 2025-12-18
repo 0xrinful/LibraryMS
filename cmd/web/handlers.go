@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -189,6 +190,12 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 		app.session.Cookie.Persist = false
 	}
 
+	err = app.session.RenewToken(r.Context())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	app.session.Put(r.Context(), "authenticatedUserID", user.ID)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -221,6 +228,38 @@ func (app *application) displayBook(w http.ResponseWriter, r *http.Request) {
 	data.Book = book
 
 	app.render(w, http.StatusOK, "book.html", data)
+}
+
+func (app *application) borrowBook(w http.ResponseWriter, r *http.Request) {
+	bookID, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil || bookID < 1 {
+		app.notFound(w, r)
+		return
+	}
+
+	userID := app.session.GetInt64(r.Context(), "authenticatedUserID")
+
+	err = app.models.Books.BorrowBook(userID, bookID)
+	if err != nil {
+		switch err {
+		case data.ErrAlreadyBorrowed:
+			app.flashError(r, "You already borrowed this book.")
+		case data.ErrNoAvailableCopies:
+			app.flashError(r, "No available copies right now.")
+		case data.ErrRecordNotFound:
+			app.notFound(w, r)
+			return
+		default:
+			app.serverError(w, err)
+			return
+		}
+
+		http.Redirect(w, r, fmt.Sprintf("/books/%d", bookID), http.StatusSeeOther)
+		return
+	}
+
+	app.flashInfo(r, "Book borrowed successfully.")
+	http.Redirect(w, r, fmt.Sprintf("/books/%d", bookID), http.StatusSeeOther)
 }
 
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {

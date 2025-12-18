@@ -53,6 +53,8 @@ func (app *application) newTemplateData(r *http.Request) *templateData {
 	td := &templateData{
 		IsAuthenticated: app.isAuthenticated(r),
 		DisplayNav:      true,
+		FlashInfo:       app.session.PopString(r.Context(), "flash_info"),
+		FlashError:      app.session.PopString(r.Context(), "flash_error"),
 	}
 
 	user, ok := r.Context().Value(userContextKey).(*data.User)
@@ -61,4 +63,12 @@ func (app *application) newTemplateData(r *http.Request) *templateData {
 	}
 
 	return td
+}
+
+func (app *application) flashInfo(r *http.Request, msg string) {
+	app.session.Put(r.Context(), "flash_info", msg)
+}
+
+func (app *application) flashError(r *http.Request, msg string) {
+	app.session.Put(r.Context(), "flash_error", msg)
 }

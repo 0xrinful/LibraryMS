@@ -14,7 +14,7 @@ import (
 var ErrDuplicateEmail = errors.New("models: duplicate email")
 
 type User struct {
-	ID        int
+	ID        int64
 	CreatedAt time.Time
 	Name      string
 	Email     string
@@ -110,7 +110,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 	return &user, nil
 }
 
-func (m UserModel) Get(id int) (*User, error) {
+func (m UserModel) Get(id int64) (*User, error) {
 	if id < 1 {
 		return nil, ErrRecordNotFound
 	}

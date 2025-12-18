@@ -54,7 +54,16 @@
         {{end}}
       </div>
     </nav>
+
+    <div id="flash-container">
+      {{if .FlashInfo}}
+      <div class="flash flash-info">{{.FlashInfo}}</div>
+      {{end}} {{if .FlashError}}
+      <div class="flash flash-error">{{.FlashError}}</div>
+      {{end}}
+    </div>
     {{end}} {{template "main" .}}
+    <script src="/static/js/flash.js"></script>
   </body>
 </html>
 {{end}}

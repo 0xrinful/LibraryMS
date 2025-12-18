@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
 	_ "github.com/lib/pq"
 
@@ -51,6 +52,7 @@ func main() {
 	}
 
 	sessionManager := scs.New()
+	sessionManager.Store = postgresstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
 	sessionManager.Cookie.HttpOnly = true
 	sessionManager.Cookie.SameSite = http.SameSiteLaxMode

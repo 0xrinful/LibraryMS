@@ -9,6 +9,11 @@ import (
 	"github.com/lib/pq"
 )
 
+var (
+	ErrAlreadyBorrowed   = errors.New("book already borrowed by user")
+	ErrNoAvailableCopies = errors.New("no available copies")
+)
+
 type Book struct {
 	ID              int
 	Title           string
@@ -104,4 +109,93 @@ func (m BookModel) GetBookByID(id int) (*Book, error) {
 
 	b.Genres = genres
 	return &b, nil
+}
+
+func (m BookModel) BorrowBook(userID, bookID int64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	tx, err := m.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var available int
+	err = tx.QueryRowContext(ctx,
+		`SELECT copies_available FROM books WHERE id = $1`,
+		bookID,
+	).Scan(&available)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return ErrRecordNotFound
+		}
+		return err
+	}
+
+	if available < 1 {
+		return ErrNoAvailableCopies
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO borrow_records (user_id, book_id)
+		VALUES ($1, $2)
+	`, userID, bookID)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return ErrAlreadyBorrowed
+		}
+		return err
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		UPDATE books
+		SET copies_available = copies_available - 1,
+		    version = version + 1
+		WHERE id = $1
+	`, bookID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (m BookModel) ReturnBook(userID, bookID int64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	tx, err := m.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	result, err := tx.ExecContext(ctx, `
+		UPDATE borrow_records
+		SET returned_at = NOW()
+		WHERE user_id = $1
+		  AND book_id = $2
+		  AND returned_at IS NULL
+	`, userID, bookID)
+	if err != nil {
+		return err
+	}
+
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		return ErrRecordNotFound
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		UPDATE books
+		SET copies_available = copies_available + 1,
+		    version = version + 1
+		WHERE id = $1
+	`, bookID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }

@@ -81,9 +81,17 @@
       </div>
 
       <div class="book-actions">
-        <button class="btn btn-primary btn-large">
-          <i class="fas fa-book-reader"></i> Borrow Book
+        {{if gt .Book.CopiesAvailable 0}}
+        <form method="POST" action="/books/{{.Book.ID}}/borrow">
+          <button class="btn btn-primary btn-large" type="submit">
+            <i class="fas fa-book-reader"></i> Borrow Book
+          </button>
+        </form>
+        {{else}}
+        <button class="btn btn-primary btn-large" disabled>
+          No copies available
         </button>
+        {{end}}
       </div>
 
       <div class="book-description">

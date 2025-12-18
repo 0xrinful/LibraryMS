@@ -10,6 +10,8 @@ import (
 )
 
 type templateData struct {
+	FlashInfo       string
+	FlashError      string
 	DisplayNav      bool
 	Form            any
 	IsAuthenticated bool
