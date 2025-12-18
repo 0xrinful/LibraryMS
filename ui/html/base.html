@@ -24,8 +24,22 @@
       </div>
 
       <div class="nav-search">
-        <i class="fas fa-search"></i>
-        <input type="text" placeholder="Search books..." />
+        <form method="GET" action="/search">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            name="q"
+            placeholder="Search books..."
+            value="{{.SearchQuery}}"
+          />
+          <input type="hidden" name="category" value="{{.SearchCategory}}" />
+          <input
+            type="hidden"
+            name="availability"
+            value="{{.SearchAvailability}}"
+          />
+          <input type="hidden" name="sort" value="{{.SearchSort}}" />
+        </form>
       </div>
 
       <div class="nav-links">

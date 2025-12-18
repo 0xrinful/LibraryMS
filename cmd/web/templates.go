@@ -23,6 +23,11 @@ type templateData struct {
 	BorrowHistory  []*data.BorrowedBook
 	ActiveBorrows  int
 	TotalBorrowed  int
+
+	SearchQuery        string
+	SearchCategory     string
+	SearchAvailability string
+	SearchSort         string
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

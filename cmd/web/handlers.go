@@ -219,7 +219,24 @@ func (app *application) loginPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) search(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+	category := r.URL.Query().Get("category")
+	availability := r.URL.Query().Get("availability")
+	sort := r.URL.Query().Get("sort")
+
+	books, err := app.models.Books.Search(q, category, availability, sort)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
 	data := app.newTemplateData(r)
+	data.Books = books
+	data.SearchQuery = q
+	data.SearchCategory = category
+	data.SearchAvailability = availability
+	data.SearchSort = sort
+
 	app.render(w, 200, "search.html", data)
 }
 

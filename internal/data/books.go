@@ -199,3 +199,62 @@ func (m BookModel) ReturnBook(userID, bookID int64) error {
 
 	return tx.Commit()
 }
+
+func (m BookModel) Search(q, category, availability, sort string) ([]*Book, error) {
+	sqlStr := `
+        SELECT id, title, author, publish_date, isbn, description, cover_image, genres, pages,
+               language, publisher, copies_total, copies_available, version
+        FROM books
+        WHERE (title ILIKE $1 OR author ILIKE $1 OR isbn ILIKE $1)
+    `
+	args := []any{"%" + q + "%"}
+
+	if category != "" && category != "All Categories" {
+		sqlStr += " AND $2 = ANY(genres)"
+		args = append(args, category)
+	}
+
+	if availability != "" {
+		switch availability {
+		case "Available":
+			sqlStr += " AND copies_available > 0"
+		case "Borrowed":
+			sqlStr += " AND copies_available = 0"
+		}
+	}
+
+	switch sort {
+	case "Title (A-Z)":
+		sqlStr += " ORDER BY title ASC"
+	case "Title (Z-A)":
+		sqlStr += " ORDER BY title DESC"
+	case "Author (A-Z)":
+		sqlStr += " ORDER BY author ASC"
+	case "Newest First":
+		sqlStr += " ORDER BY publish_date DESC"
+	default:
+		sqlStr += " ORDER BY title ASC"
+	}
+
+	rows, err := m.DB.Query(sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var books []*Book
+	for rows.Next() {
+		var b Book
+		var genres []string
+		if err := rows.Scan(
+			&b.ID, &b.Title, &b.Author, &b.PublishDate, &b.ISBN, &b.Description,
+			&b.CoverImage, pq.Array(&genres), &b.Pages, &b.Language, &b.Publisher,
+			&b.CopiesTotal, &b.CopiesAvailable, &b.Version,
+		); err != nil {
+			return nil, err
+		}
+		b.Genres = genres
+		books = append(books, &b)
+	}
+	return books, nil
+}

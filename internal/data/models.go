@@ -19,6 +19,7 @@ type Models struct {
 		GetBookByID(id int) (*Book, error)
 		BorrowBook(userID, bookID int64, days int) error
 		ReturnBook(userID, bookID int64) error
+		Search(q, category, availability, sort string) ([]*Book, error)
 	}
 
 	BorrowRecord interface {
