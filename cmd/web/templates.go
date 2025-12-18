@@ -18,6 +18,10 @@ type templateData struct {
 	User            *data.User
 	Book            *data.Book
 	Books           []*data.Book
+
+	CurrentBorrows []*data.BorrowedBook
+	ActiveBorrows  int
+	TotalBorrowed  int
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

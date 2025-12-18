@@ -37,6 +37,7 @@ func (app *application) routes() http.Handler {
 
 		r.Get("/profile", app.profile)
 		r.Post("/books/{id}/borrow", app.borrowBook)
+		r.Post("/books/{id}/return", app.returnBook)
 
 		r.Get("/dashboard", app.dashboard)
 	})

@@ -28,6 +28,29 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
+
+	userID := data.User.ID
+	currentBorrows, err := app.models.BorrowRecord.CurrentByUser(userID)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	activeCount, err := app.models.BorrowRecord.ActiveCountByUser(userID)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	totalCount, err := app.models.BorrowRecord.TotalCountByUser(userID)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data.CurrentBorrows = currentBorrows
+	data.ActiveBorrows = activeCount
+	data.TotalBorrowed = totalCount
 	app.render(w, 200, "profile.html", data)
 }
 
@@ -239,7 +262,14 @@ func (app *application) borrowBook(w http.ResponseWriter, r *http.Request) {
 
 	userID := app.session.GetInt64(r.Context(), "authenticatedUserID")
 
-	err = app.models.Books.BorrowBook(userID, bookID)
+	days, err := strconv.Atoi(r.FormValue("days"))
+	if err != nil || days < 1 || days > 60 {
+		app.flashError(r, "Invalid borrow duration.")
+		http.Redirect(w, r, fmt.Sprintf("/books/%d", bookID), http.StatusSeeOther)
+		return
+	}
+
+	err = app.models.Books.BorrowBook(userID, bookID, days)
 	if err != nil {
 		switch err {
 		case data.ErrAlreadyBorrowed:
@@ -260,6 +290,30 @@ func (app *application) borrowBook(w http.ResponseWriter, r *http.Request) {
 
 	app.flashInfo(r, "Book borrowed successfully.")
 	http.Redirect(w, r, fmt.Sprintf("/books/%d", bookID), http.StatusSeeOther)
+}
+
+func (app *application) returnBook(w http.ResponseWriter, r *http.Request) {
+	bookID, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	if err != nil || bookID < 1 {
+		app.notFound(w, r)
+		return
+	}
+
+	userID := app.session.GetInt64(r.Context(), "authenticatedUserID")
+
+	err = app.models.Books.ReturnBook(userID, bookID)
+	if err != nil {
+		switch err {
+		case data.ErrRecordNotFound:
+			app.notFound(w, r)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.flashInfo(r, "Book returned successfully.")
+	http.Redirect(w, r, "/profile", http.StatusSeeOther)
 }
 
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {
