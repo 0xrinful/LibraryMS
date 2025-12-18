@@ -82,7 +82,23 @@
 
       <div class="book-actions">
         {{if gt .Book.CopiesAvailable 0}}
-        <form method="POST" action="/books/{{.Book.ID}}/borrow">
+        <form
+          method="POST"
+          action="/books/{{.Book.ID}}/borrow"
+          class="borrow-form"
+        >
+          <div class="borrow-duration">
+            <label for="days">Borrow duration</label>
+
+            <select name="days" id="days" class="duration-select">
+              <option value="7">7 days</option>
+              <option value="14">14 days</option>
+              <option value="30" selected>30 days</option>
+            </select>
+
+            <p class="due-hint">Due on: <strong id="due-preview"></strong></p>
+          </div>
+
           <button class="btn btn-primary btn-large" type="submit">
             <i class="fas fa-book-reader"></i> Borrow Book
           </button>
@@ -110,4 +126,22 @@
     </div>
   </div>
 </main>
+
+<script>
+  (function () {
+    const select = document.getElementById("days");
+    const preview = document.getElementById("due-preview");
+    if (!select || !preview) return;
+
+    function update() {
+      const days = parseInt(select.value, 10);
+      const due = new Date();
+      due.setDate(due.getDate() + days);
+      preview.textContent = due.toDateString();
+    }
+
+    select.addEventListener("change", update);
+    update();
+  })();
+</script>
 {{end}}

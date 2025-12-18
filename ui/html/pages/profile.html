@@ -6,22 +6,25 @@
         <div class="profile-avatar">
           <i class="fas fa-user"></i>
         </div>
-        <h2 class="profile-name">John Doe</h2>
-        <p class="profile-email">john.doe@university.edu</p>
-        <p class="profile-id">Member ID: LIB2024001</p>
-
+        <h2 class="profile-name">{{.User.Name}}</h2>
+        <p class="profile-email">{{.User.Email}}</p>
+        <p class="profile-id">Member ID: {{.User.ID}}</p>
         <div class="profile-stats">
           <div class="stat-item">
             <span class="stat-label">Member Since</span>
-            <span class="stat-value">January 2024</span>
+            <span class="stat-value">
+              {{.User.CreatedAt.Format "January 2006"}}
+            </span>
           </div>
+
           <div class="stat-item">
             <span class="stat-label">Active Borrows</span>
-            <span class="stat-value">2</span>
+            <span class="stat-value">{{.ActiveBorrows}}</span>
           </div>
+
           <div class="stat-item">
             <span class="stat-label">Total Borrowed</span>
-            <span class="stat-value">15</span>
+            <span class="stat-value">{{.TotalBorrowed}}</span>
           </div>
         </div>
       </div>
@@ -35,40 +38,35 @@
       </div>
 
       <div class="tab-content">
-        <h2><i class="fas fa-book"></i> Currently Borrowed (2)</h2>
+        <h2>
+          <i class="fas fa-book"></i>
+          Currently Borrowed ({{len .CurrentBorrows}})
+        </h2>
 
         <div class="borrowed-books">
+          {{range .CurrentBorrows}}
           <div class="borrowed-item">
-            <img
-              src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=150&h=200&fit=crop"
-              alt="Book"
-            />
-            <div class="borrowed-info">
-              <h3>To Kill a Mockingbird</h3>
-              <p class="author">by Harper Lee</p>
-              <p class="date-info">
-                <span>Borrowed: 11/10/2024</span>
-                <span class="due-date">Due: 12/10/2024</span>
-              </p>
-              <button class="btn btn-dark">Return Book</button>
-            </div>
-          </div>
+            <img src="{{.CoverImage}}" alt="{{.Title}}" />
 
-          <div class="borrowed-item">
-            <img
-              src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=150&h=200&fit=crop"
-              alt="Book"
-            />
             <div class="borrowed-info">
-              <h3>1984</h3>
-              <p class="author">by George Orwell</p>
+              <h3>{{.Title}}</h3>
+              <p class="author">by {{.Author}}</p>
+
               <p class="date-info">
-                <span>Borrowed: 11/15/2024</span>
-                <span class="due-date">Due: 12/15/2024</span>
+                <span>Borrowed: {{.BorrowedAt.Format "02 Jan 2006"}}</span>
+                <span class="due-date"
+                  >Due: {{.DueAt.Format "02 Jan 2006"}}</span
+                >
               </p>
-              <button class="btn btn-dark">Return Book</button>
+
+              <form method="POST" action="/books/{{.BookID}}/return">
+                <button class="btn btn-dark">Return Book</button>
+              </form>
             </div>
           </div>
+          {{else}}
+          <p>No active borrowed books.</p>
+          {{end}}
         </div>
       </div>
     </div>
