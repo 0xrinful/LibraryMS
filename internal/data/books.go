@@ -12,6 +12,7 @@ import (
 var (
 	ErrAlreadyBorrowed   = errors.New("book already borrowed by user")
 	ErrNoAvailableCopies = errors.New("no available copies")
+	ErrDuplicateISBN     = errors.New("duplicate ISBN")
 )
 
 type Book struct {
@@ -109,6 +110,34 @@ func (m BookModel) GetBookByID(id int) (*Book, error) {
 
 	b.Genres = genres
 	return &b, nil
+}
+
+func (m BookModel) ISBNExists(isbn string) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM books WHERE isbn = $1)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var exists bool
+	err := m.DB.QueryRowContext(ctx, query, isbn).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (m BookModel) ISBNExistsExcluding(isbn string, excludeID int) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM books WHERE isbn = $1 AND id != $2)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var exists bool
+	err := m.DB.QueryRowContext(ctx, query, isbn, excludeID).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 func (m BookModel) BorrowBook(userID, bookID int64, days int) error {
@@ -334,7 +363,14 @@ func (m BookModel) Insert(book *Book) error {
 		book.CopiesAvailable,
 	}
 
-	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.ID, &book.Version)
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&book.ID, &book.Version)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+			return ErrDuplicateISBN
+		}
+		return err
+	}
+	return nil
 }
 
 func (m BookModel) Update(book *Book) error {
@@ -371,6 +407,9 @@ func (m BookModel) Update(book *Book) error {
 		case errors.Is(err, sql.ErrNoRows):
 			return ErrRecordNotFound
 		default:
+			if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
+				return ErrDuplicateISBN
+			}
 			return err
 		}
 	}

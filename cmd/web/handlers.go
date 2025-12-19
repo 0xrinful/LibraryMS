@@ -54,7 +54,6 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 
-	// Get total books count
 	totalBooks, err := app.models.Books.Count()
 	if err != nil {
 		app.serverError(w, err)
@@ -62,7 +61,6 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.TotalBooks = totalBooks
 
-	// Get total members count
 	totalMembers, err := app.models.Users.Count()
 	if err != nil {
 		app.serverError(w, err)
@@ -70,7 +68,6 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.TotalMembers = totalMembers
 
-	// Get books borrowed (active borrows) count
 	booksBorrowed, err := app.models.BorrowRecord.CountActiveBorrows()
 	if err != nil {
 		app.serverError(w, err)
@@ -78,7 +75,6 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.BooksBorrowed = booksBorrowed
 
-	// Get overdue books count
 	overdueBooks, err := app.models.BorrowRecord.CountOverdue()
 	if err != nil {
 		app.serverError(w, err)
@@ -86,7 +82,6 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.OverdueBooks = overdueBooks
 
-	// Get all books for the table
 	books, err := app.models.Books.GetAll()
 	if err != nil {
 		app.serverError(w, err)
@@ -94,7 +89,6 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Books = books
 
-	// Get all members for the table
 	members, err := app.models.Users.GetAll()
 	if err != nil {
 		app.serverError(w, err)
@@ -174,7 +168,7 @@ func (app *application) signupPost(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, data.ErrDuplicateEmail):
 			form.AddError("email", "this email address already exists")
 			data := &templateData{DisplayNav: false, Form: form}
-			app.render(w, http.StatusUnprocessableEntity, "signup.html", data)
+			app.render(w, http.StatusUnprocessableEntity, "signup. html", data)
 		default:
 			app.serverError(w, err)
 		}
@@ -413,8 +407,6 @@ func (app *application) booksFragment(w http.ResponseWriter, r *http.Request) {
 	app.renderPartial(w, "book_cards.html", data)
 }
 
-// Dashboard Book Handlers
-
 type bookForm struct {
 	Title       string
 	Author      string
@@ -441,27 +433,61 @@ func (app *application) createBook(w http.ResponseWriter, r *http.Request) {
 	copiesTotal, _ := strconv.Atoi(r.FormValue("copies_total"))
 
 	form := bookForm{
-		Title:       r.FormValue("title"),
-		Author:      r.FormValue("author"),
-		ISBN:        r.FormValue("isbn"),
-		Description: r.FormValue("description"),
-		CoverImage:  r.FormValue("cover_image"),
-		Genres:      r.FormValue("genres"),
+		Title:       strings.TrimSpace(r.FormValue("title")),
+		Author:      strings.TrimSpace(r.FormValue("author")),
+		ISBN:        strings.TrimSpace(r.FormValue("isbn")),
+		Description: strings.TrimSpace(r.FormValue("description")),
+		CoverImage:  strings.TrimSpace(r.FormValue("cover_image")),
+		Genres:      strings.TrimSpace(r.FormValue("genres")),
 		Pages:       pages,
-		Language:    r.FormValue("language"),
-		Publisher:   r.FormValue("publisher"),
+		Language:    strings.TrimSpace(r.FormValue("language")),
+		Publisher:   strings.TrimSpace(r.FormValue("publisher")),
 		PublishDate: r.FormValue("publish_date"),
 		CopiesTotal: copiesTotal,
 		Validator:   *validator.New(),
 	}
 
-	form.Check(validator.NotBlank(form.Title), "title", "must be provided")
-	form.Check(validator.NotBlank(form.Author), "author", "must be provided")
-	form.Check(validator.NotBlank(form.ISBN), "isbn", "must be provided")
-	form.Check(form.CopiesTotal >= 1, "copies_total", "must be at least 1")
+	form.Check(validator.NotBlank(form.Title), "title", "Title is required")
+	form.Check(len(form.Title) <= 500, "title", "Title must not exceed 500 characters")
+
+	form.Check(validator.NotBlank(form.Author), "author", "Author is required")
+	form.Check(len(form.Author) <= 500, "author", "Author must not exceed 500 characters")
+
+	form.Check(validator.NotBlank(form.ISBN), "isbn", "ISBN is required")
+	form.Check(len(form.ISBN) >= 10, "isbn", "ISBN must be at least 10 characters")
+	form.Check(len(form.ISBN) <= 17, "isbn", "ISBN must not exceed 17 characters")
+
+	form.Check(form.CopiesTotal >= 1, "copies_total", "Total copies must be at least 1")
+	form.Check(form.CopiesTotal <= 10000, "copies_total", "Total copies must not exceed 10000")
+
+	if form.Pages < 0 {
+		form.AddError("pages", "Pages cannot be negative")
+	}
+	if form.Pages > 50000 {
+		form.AddError("pages", "Pages must not exceed 50000")
+	}
+
+	if len(form.Description) > 5000 {
+		form.AddError("description", "Description must not exceed 5000 characters")
+	}
+
+	if form.ISBN != "" {
+		exists, err := app.models.Books.ISBNExists(form.ISBN)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+		if exists {
+			form.AddError("isbn", "A book with this ISBN already exists")
+		}
+	}
 
 	if !form.Valid() {
-		app.flashError(r, "Please fill in all required fields correctly.")
+		var errorMessages []string
+		for field, msg := range form.Errors {
+			errorMessages = append(errorMessages, fmt.Sprintf("%s: %s", field, msg))
+		}
+		app.flashError(r, strings.Join(errorMessages, "; "))
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 		return
 	}
@@ -471,8 +497,7 @@ func (app *application) createBook(w http.ResponseWriter, r *http.Request) {
 		publishDate = time.Now()
 	}
 
-	// Parse genres from comma-separated string
-	var genres []string
+	genres := []string{}
 	if form.Genres != "" {
 		for _, g := range splitAndTrim(form.Genres) {
 			if g != "" {
@@ -498,6 +523,11 @@ func (app *application) createBook(w http.ResponseWriter, r *http.Request) {
 
 	err = app.models.Books.Insert(book)
 	if err != nil {
+		if errors.Is(err, data.ErrDuplicateISBN) {
+			app.flashError(r, "A book with this ISBN already exists.")
+			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+			return
+		}
 		app.serverError(w, err)
 		return
 	}
@@ -520,7 +550,6 @@ func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get existing book
 	book, err := app.models.Books.GetBookByID(id)
 	if err != nil {
 		switch {
@@ -536,13 +565,71 @@ func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
 	copiesTotal, _ := strconv.Atoi(r.FormValue("copies_total"))
 	copiesAvailable, _ := strconv.Atoi(r.FormValue("copies_available"))
 
+	v := validator.New()
+
+	title := strings.TrimSpace(r.FormValue("title"))
+	author := strings.TrimSpace(r.FormValue("author"))
+	isbn := strings.TrimSpace(r.FormValue("isbn"))
+	description := strings.TrimSpace(r.FormValue("description"))
+
+	v.Check(validator.NotBlank(title), "title", "Title is required")
+	v.Check(len(title) <= 500, "title", "Title must not exceed 500 characters")
+
+	v.Check(validator.NotBlank(author), "author", "Author is required")
+	v.Check(len(author) <= 500, "author", "Author must not exceed 500 characters")
+
+	v.Check(validator.NotBlank(isbn), "isbn", "ISBN is required")
+	v.Check(len(isbn) >= 10, "isbn", "ISBN must be at least 10 characters")
+	v.Check(len(isbn) <= 17, "isbn", "ISBN must not exceed 17 characters")
+
+	v.Check(copiesTotal >= 1, "copies_total", "Total copies must be at least 1")
+	v.Check(copiesTotal <= 10000, "copies_total", "Total copies must not exceed 10000")
+
+	v.Check(copiesAvailable >= 0, "copies_available", "Available copies cannot be negative")
+	v.Check(
+		copiesAvailable <= copiesTotal,
+		"copies_available",
+		"Available copies cannot exceed total copies",
+	)
+
+	if pages < 0 {
+		v.AddError("pages", "Pages cannot be negative")
+	}
+	if pages > 50000 {
+		v.AddError("pages", "Pages must not exceed 50000")
+	}
+
+	if len(description) > 5000 {
+		v.AddError("description", "Description must not exceed 5000 characters")
+	}
+
+	if isbn != "" && isbn != book.ISBN {
+		exists, err := app.models.Books.ISBNExistsExcluding(isbn, id)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+		if exists {
+			v.AddError("isbn", "A book with this ISBN already exists")
+		}
+	}
+
+	if !v.Valid() {
+		var errorMessages []string
+		for field, msg := range v.Errors {
+			errorMessages = append(errorMessages, fmt.Sprintf("%s: %s", field, msg))
+		}
+		app.flashError(r, strings.Join(errorMessages, "; "))
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+
 	publishDate, err := time.Parse("2006-01-02", r.FormValue("publish_date"))
 	if err != nil {
 		publishDate = book.PublishDate
 	}
 
-	// Parse genres from comma-separated string
-	var genres []string
+	genres := []string{}
 	genresStr := r.FormValue("genres")
 	if genresStr != "" {
 		for _, g := range splitAndTrim(genresStr) {
@@ -552,15 +639,15 @@ func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	book.Title = r.FormValue("title")
-	book.Author = r.FormValue("author")
-	book.ISBN = r.FormValue("isbn")
-	book.Description = r.FormValue("description")
-	book.CoverImage = r.FormValue("cover_image")
+	book.Title = title
+	book.Author = author
+	book.ISBN = isbn
+	book.Description = description
+	book.CoverImage = strings.TrimSpace(r.FormValue("cover_image"))
 	book.Genres = genres
 	book.Pages = pages
-	book.Language = r.FormValue("language")
-	book.Publisher = r.FormValue("publisher")
+	book.Language = strings.TrimSpace(r.FormValue("language"))
+	book.Publisher = strings.TrimSpace(r.FormValue("publisher"))
 	book.PublishDate = publishDate
 	book.CopiesTotal = copiesTotal
 	book.CopiesAvailable = copiesAvailable
@@ -570,6 +657,9 @@ func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
 			app.notFound(w, r)
+		case errors.Is(err, data.ErrDuplicateISBN):
+			app.flashError(r, "A book with this ISBN already exists.")
+			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 		default:
 			app.serverError(w, err)
 		}
@@ -603,8 +693,6 @@ func (app *application) deleteBook(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
-// Dashboard Member Handlers
-
 func (app *application) updateMember(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -619,7 +707,6 @@ func (app *application) updateMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get existing user
 	user, err := app.models.Users.Get(id)
 	if err != nil {
 		switch {
@@ -631,9 +718,34 @@ func (app *application) updateMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user.Name = r.FormValue("name")
-	user.Email = r.FormValue("email")
-	user.Role = r.FormValue("role")
+	name := strings.TrimSpace(r.FormValue("name"))
+	email := strings.TrimSpace(r.FormValue("email"))
+	role := strings.TrimSpace(r.FormValue("role"))
+
+	v := validator.New()
+
+	v.Check(validator.NotBlank(name), "name", "Name is required")
+	v.Check(len(name) >= 3, "name", "Name must be at least 3 characters")
+	v.Check(len(name) <= 500, "name", "Name must not exceed 500 characters")
+
+	v.Check(validator.NotBlank(email), "email", "Email is required")
+	v.Check(validator.Matches(email, validator.EmailRX), "email", "Invalid email format")
+
+	v.Check(role == "user" || role == "admin", "role", "Role must be 'user' or 'admin'")
+
+	if !v.Valid() {
+		var errorMessages []string
+		for field, msg := range v.Errors {
+			errorMessages = append(errorMessages, fmt.Sprintf("%s: %s", field, msg))
+		}
+		app.flashError(r, strings.Join(errorMessages, "; "))
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+
+	user.Name = name
+	user.Email = email
+	user.Role = role
 
 	err = app.models.Users.Update(user)
 	if err != nil {
@@ -661,7 +773,6 @@ func (app *application) deleteMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Prevent deleting yourself
 	currentUserID := app.session.GetInt64(r.Context(), "authenticatedUserID")
 	if currentUserID == id {
 		app.flashError(r, "You cannot delete your own account.")
@@ -684,7 +795,6 @@ func (app *application) deleteMember(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
 
-// Helper function
 func splitAndTrim(s string) []string {
 	var result []string
 	for _, part := range strings.Split(s, ",") {

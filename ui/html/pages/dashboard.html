@@ -181,25 +181,30 @@
       <h3>Add New Book</h3>
       <button class="modal-close" onclick="closeModal('addBookModal')">&times;</button>
     </div>
-    <form action="/dashboard/books" method="POST" class="modal-form">
+    <form action="/dashboard/books" method="POST" class="modal-form" onsubmit="return validateAddBookForm()">
+      <div id="addBookErrors" class="form-errors" style="display: none;"></div>
       <div class="form-row">
         <div class="form-group">
           <label for="add-title">Title *</label>
           <input type="text" id="add-title" name="title" required>
+          <span class="field-error" id="add-title-error"></span>
         </div>
         <div class="form-group">
           <label for="add-author">Author *</label>
           <input type="text" id="add-author" name="author" required>
+          <span class="field-error" id="add-author-error"></span>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="add-isbn">ISBN *</label>
-          <input type="text" id="add-isbn" name="isbn" required>
+          <input type="text" id="add-isbn" name="isbn" required minlength="10" maxlength="17">
+          <span class="field-error" id="add-isbn-error"></span>
         </div>
         <div class="form-group">
           <label for="add-copies">Total Copies *</label>
-          <input type="number" id="add-copies" name="copies_total" min="1" value="1" required>
+          <input type="number" id="add-copies" name="copies_total" min="1" max="10000" value="1" required>
+          <span class="field-error" id="add-copies-error"></span>
         </div>
       </div>
       <div class="form-row">
@@ -209,32 +214,34 @@
         </div>
         <div class="form-group">
           <label for="add-pages">Pages</label>
-          <input type="number" id="add-pages" name="pages" min="1">
+          <input type="number" id="add-pages" name="pages" min="0" max="50000" required>
+          <span class="field-error" id="add-pages-error"></span>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="add-language">Language</label>
-          <input type="text" id="add-language" name="language" value="English">
+          <input type="text" id="add-language" name="language" value="English" required>
         </div>
         <div class="form-group">
           <label for="add-publisher">Publisher</label>
-          <input type="text" id="add-publisher" name="publisher">
+          <input type="text" id="add-publisher" name="publisher" required>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="add-publish-date">Publish Date</label>
-          <input type="date" id="add-publish-date" name="publish_date">
+          <input type="date" id="add-publish-date" name="publish_date" >
         </div>
         <div class="form-group">
           <label for="add-cover">Cover Image URL</label>
-          <input type="text" id="add-cover" name="cover_image" placeholder="https://...">
+          <input type="text" id="add-cover" name="cover_image" placeholder="https://..." required>
         </div>
       </div>
       <div class="form-group">
         <label for="add-description">Description</label>
-        <textarea id="add-description" name="description" rows="3"></textarea>
+        <textarea id="add-description" name="description" rows="3" maxlength="5000"></textarea>
+        <span class="field-error" id="add-description-error"></span>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" onclick="closeModal('addBookModal')">Cancel</button>
@@ -251,35 +258,42 @@
       <h3>Edit Book</h3>
       <button class="modal-close" onclick="closeModal('editBookModal')">&times;</button>
     </div>
-    <form id="editBookForm" method="POST" class="modal-form">
+    <form id="editBookForm" method="POST" class="modal-form" onsubmit="return validateEditBookForm()">
+      <div id="editBookErrors" class="form-errors" style="display: none;"></div>
       <div class="form-row">
         <div class="form-group">
           <label for="edit-title">Title *</label>
           <input type="text" id="edit-title" name="title" required>
+          <span class="field-error" id="edit-title-error"></span>
         </div>
         <div class="form-group">
           <label for="edit-author">Author *</label>
           <input type="text" id="edit-author" name="author" required>
+          <span class="field-error" id="edit-author-error"></span>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="edit-isbn">ISBN *</label>
-          <input type="text" id="edit-isbn" name="isbn" required>
+          <input type="text" id="edit-isbn" name="isbn" required minlength="10" maxlength="17">
+          <span class="field-error" id="edit-isbn-error"></span>
         </div>
         <div class="form-group">
           <label for="edit-copies-total">Total Copies *</label>
-          <input type="number" id="edit-copies-total" name="copies_total" min="1" required>
+          <input type="number" id="edit-copies-total" name="copies_total" min="1" max="10000" required>
+          <span class="field-error" id="edit-copies-total-error"></span>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label for="edit-copies-available">Available Copies</label>
           <input type="number" id="edit-copies-available" name="copies_available" min="0">
+          <span class="field-error" id="edit-copies-available-error"></span>
         </div>
         <div class="form-group">
           <label for="edit-pages">Pages</label>
-          <input type="number" id="edit-pages" name="pages" min="1">
+          <input type="number" id="edit-pages" name="pages" min="0" max="50000">
+          <span class="field-error" id="edit-pages-error"></span>
         </div>
       </div>
       <div class="form-row">
@@ -308,7 +322,8 @@
       </div>
       <div class="form-group">
         <label for="edit-description">Description</label>
-        <textarea id="edit-description" name="description" rows="3"></textarea>
+        <textarea id="edit-description" name="description" rows="3" maxlength="5000"></textarea>
+        <span class="field-error" id="edit-description-error"></span>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" onclick="closeModal('editBookModal')">Cancel</button>
@@ -326,7 +341,7 @@
       <button class="modal-close" onclick="closeModal('deleteBookModal')">&times;</button>
     </div>
     <div class="modal-body">
-      <p>Are you sure you want to delete "<span id="deleteBookTitle"></span>"? </p>
+      <p>Are you sure you want to delete "<span id="deleteBookTitle"></span>"?  </p>
       <p class="warning-text">This action cannot be undone.</p>
     </div>
     <form id="deleteBookForm" method="POST" class="modal-actions">
@@ -343,14 +358,17 @@
       <h3>Edit Member</h3>
       <button class="modal-close" onclick="closeModal('editMemberModal')">&times;</button>
     </div>
-    <form id="editMemberForm" method="POST" class="modal-form">
+    <form id="editMemberForm" method="POST" class="modal-form" onsubmit="return validateEditMemberForm()">
+      <div id="editMemberErrors" class="form-errors" style="display:  none;"></div>
       <div class="form-group">
         <label for="edit-member-name">Name *</label>
-        <input type="text" id="edit-member-name" name="name" required>
+        <input type="text" id="edit-member-name" name="name" required minlength="3" maxlength="500">
+        <span class="field-error" id="edit-member-name-error"></span>
       </div>
       <div class="form-group">
         <label for="edit-member-email">Email *</label>
         <input type="email" id="edit-member-email" name="email" required>
+        <span class="field-error" id="edit-member-email-error"></span>
       </div>
       <div class="form-group">
         <label for="edit-member-role">Role</label>
@@ -386,19 +404,21 @@
 </div>
 
 <script>
+  // Store existing ISBNs for client-side duplicate checking
+  const existingISBNs = new Map();
+  {{range .Books}}
+  existingISBNs.set("{{.ISBN}}", {{.ID}});
+  {{end}}
+
   // Tab switching
   document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', function() {
-      // Remove active class from all tabs
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      // Add active class to clicked tab
       this.classList.add('active');
       
-      // Hide all tab contents
       document.getElementById('books-tab').style.display = 'none';
       document.getElementById('members-tab').style.display = 'none';
       
-      // Show selected tab content
       const tabName = this.getAttribute('data-tab');
       document.getElementById(tabName + '-tab').style.display = 'block';
     });
@@ -413,6 +433,222 @@
   function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
     document.body.style.overflow = '';
+    // Clear errors when closing
+    clearFormErrors(modalId);
+  }
+
+  function clearFormErrors(modalId) {
+    const modal = document.getElementById(modalId);
+    const errorContainer = modal.querySelector('.form-errors');
+    if (errorContainer) {
+      errorContainer.style.display = 'none';
+      errorContainer.innerHTML = '';
+    }
+    modal.querySelectorAll('.field-error').forEach(el => el.textContent = '');
+    modal.querySelectorAll('input, textarea').forEach(el => el.classList.remove('input-error'));
+  }
+
+  function showFieldError(fieldId, message) {
+    const errorEl = document.getElementById(fieldId + '-error');
+    const inputEl = document.getElementById(fieldId);
+    if (errorEl) {
+      errorEl.textContent = message;
+    }
+    if (inputEl) {
+      inputEl.classList.add('input-error');
+    }
+  }
+
+  function showFormErrors(containerId, errors) {
+    const container = document.getElementById(containerId);
+    if (container && errors.length > 0) {
+      container.innerHTML = '<ul>' + errors.map(e => '<li>' + e + '</li>').join('') + '</ul>';
+      container.style.display = 'block';
+    }
+  }
+
+  // Validation functions
+  function validateAddBookForm() {
+    clearFormErrors('addBookModal');
+    const errors = [];
+    let isValid = true;
+
+    const title = document.getElementById('add-title').value.trim();
+    const author = document.getElementById('add-author').value.trim();
+    const isbn = document.getElementById('add-isbn').value.trim();
+    const copies = parseInt(document.getElementById('add-copies').value) || 0;
+    const pages = document.getElementById('add-pages').value;
+    const description = document.getElementById('add-description').value;
+
+    // Title validation
+    if (! title) {
+      showFieldError('add-title', 'Title is required');
+      isValid = false;
+    } else if (title.length > 500) {
+      showFieldError('add-title', 'Title must not exceed 500 characters');
+      isValid = false;
+    }
+
+    // Author validation
+    if (! author) {
+      showFieldError('add-author', 'Author is required');
+      isValid = false;
+    } else if (author.length > 500) {
+      showFieldError('add-author', 'Author must not exceed 500 characters');
+      isValid = false;
+    }
+
+    // ISBN validation
+    if (! isbn) {
+      showFieldError('add-isbn', 'ISBN is required');
+      isValid = false;
+    } else if (isbn.length < 10) {
+      showFieldError('add-isbn', 'ISBN must be at least 10 characters');
+      isValid = false;
+    } else if (isbn.length > 17) {
+      showFieldError('add-isbn', 'ISBN must not exceed 17 characters');
+      isValid = false;
+    } else if (existingISBNs.has(isbn)) {
+      showFieldError('add-isbn', 'A book with this ISBN already exists');
+      isValid = false;
+    }
+
+    // Copies validation
+    if (copies < 1) {
+      showFieldError('add-copies', 'Total copies must be at least 1');
+      isValid = false;
+    } else if (copies > 10000) {
+      showFieldError('add-copies', 'Total copies must not exceed 10000');
+      isValid = false;
+    }
+
+    // Pages validation
+    if (pages && (parseInt(pages) < 0 || parseInt(pages) > 50000)) {
+      showFieldError('add-pages', 'Pages must be between 0 and 50000');
+      isValid = false;
+    }
+
+    // Description validation
+    if (description && description.length > 5000) {
+      showFieldError('add-description', 'Description must not exceed 5000 characters');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function validateEditBookForm() {
+    clearFormErrors('editBookModal');
+    let isValid = true;
+
+    const title = document.getElementById('edit-title').value.trim();
+    const author = document.getElementById('edit-author').value.trim();
+    const isbn = document.getElementById('edit-isbn').value.trim();
+    const copiesTotal = parseInt(document.getElementById('edit-copies-total').value) || 0;
+    const copiesAvailable = parseInt(document.getElementById('edit-copies-available').value) || 0;
+    const pages = document.getElementById('edit-pages').value;
+    const description = document.getElementById('edit-description').value;
+
+    // Get current book ID from form action
+    const formAction = document.getElementById('editBookForm').action;
+    const currentBookId = parseInt(formAction.match(/\/books\/(\d+)\//)?.[1]) || 0;
+
+    // Title validation
+    if (!title) {
+      showFieldError('edit-title', 'Title is required');
+      isValid = false;
+    } else if (title.length > 500) {
+      showFieldError('edit-title', 'Title must not exceed 500 characters');
+      isValid = false;
+    }
+
+    // Author validation
+    if (!author) {
+      showFieldError('edit-author', 'Author is required');
+      isValid = false;
+    } else if (author.length > 500) {
+      showFieldError('edit-author', 'Author must not exceed 500 characters');
+      isValid = false;
+    }
+
+    // ISBN validation
+    if (!isbn) {
+      showFieldError('edit-isbn', 'ISBN is required');
+      isValid = false;
+    } else if (isbn.length < 10) {
+      showFieldError('edit-isbn', 'ISBN must be at least 10 characters');
+      isValid = false;
+    } else if (isbn.ength > 17) {
+      showFieldError('edit-isbn', 'ISBN must not exceed 17 characters');
+      isValid = false;
+    } else if (existingISBNs.has(isbn) && existingISBNs.get(isbn) !== currentBookId) {
+      showFieldError('edit-isbn', 'A book with this ISBN already exists');
+      isValid = false;
+    }
+
+    // Copies validation
+    if (copiesTotal < 1) {
+      showFieldError('edit-copies-total', 'Total copies must be at least 1');
+      isValid = false;
+    } else if (copiesTotal > 10000) {
+      showFieldError('edit-copies-total', 'Total copies must not exceed 10000');
+      isValid = false;
+    }
+
+    // Available copies validation
+    if (copiesAvailable < 0) {
+      showFieldError('edit-copies-available', 'Available copies cannot be negative');
+      isValid = false;
+    } else if (copiesAvailable > copiesTotal) {
+      showFieldError('edit-copies-available', 'Available copies cannot exceed total copies');
+      isValid = false;
+    }
+
+    // Pages validation
+    if (pages && (parseInt(pages) < 0 || parseInt(pages) > 50000)) {
+      showFieldError('edit-pages', 'Pages must be between 0 and 50000');
+      isValid = false;
+    }
+
+    // Description validation
+    if (description && description.length > 5000) {
+      showFieldError('edit-description', 'Description must not exceed 5000 characters');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function validateEditMemberForm() {
+    clearFormErrors('editMemberModal');
+    let isValid = true;
+
+    const name = document.getElementById('edit-member-name').value.trim();
+    const email = document.getElementById('edit-member-email').value.trim();
+
+    // Name validation
+    if (!name) {
+      showFieldError('edit-member-name', 'Name is required');
+      isValid = false;
+    } else if (name.length < 3) {
+      showFieldError('edit-member-name', 'Name must be at least 3 characters');
+      isValid = false;
+    } else if (name.length > 500) {
+      showFieldError('edit-member-name', 'Name must not exceed 500 characters');
+      isValid = false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      showFieldError('edit-member-email', 'Email is required');
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      showFieldError('edit-member-email', 'Invalid email format');
+      isValid = false;
+    }
+
+    return isValid;
   }
 
   // Close modal when clicking outside
@@ -421,6 +657,7 @@
       if (e.target === this) {
         this.classList.remove('active');
         document.body.style.overflow = '';
+        clearFormErrors(this.id);
       }
     });
   });
@@ -428,6 +665,7 @@
   // Book functions
   function openAddBookModal() {
     document.querySelector('#addBookModal form').reset();
+    clearFormErrors('addBookModal');
     openModal('addBookModal');
   }
 
@@ -460,6 +698,7 @@
     document.getElementById('edit-copies-total').value = copiesTotal;
     document.getElementById('edit-copies-available').value = copiesAvailable;
 
+    clearFormErrors('editBookModal');
     openModal('editBookModal');
   }
 
@@ -481,6 +720,7 @@
     document.getElementById('edit-member-email').value = email;
     document.getElementById('edit-member-role').value = role;
 
+    clearFormErrors('editMemberModal');
     openModal('editMemberModal');
   }
 
@@ -495,6 +735,7 @@
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay.active').forEach(modal => {
         modal.classList.remove('active');
+        clearFormErrors(modal.id);
       });
       document.body.style.overflow = '';
     }
@@ -502,14 +743,45 @@
 </script>
 
 <style>
+  /* Form Errors Styles */
+  .form-errors {
+    background:  #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    color: #dc2626;
+  }
+
+  .form-errors ul {
+    margin:  0;
+    padding-left: 1.5rem;
+  }
+
+  .form-errors li {
+    margin-bottom:  0.25rem;
+  }
+
+  .field-error {
+    color: #dc2626;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  .input-error {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2 !important;
+  }
+
   /* Modal Styles */
   .modal-overlay {
     position: fixed;
-    top: 0;
+    top:  0;
     left: 0;
     width: 100%;
     height: 100%;
-    background:  rgba(0, 0, 0, 0.5);
+    background:   rgba(0, 0, 0, 0.5);
     display: none;
     justify-content: center;
     align-items: center;
@@ -535,9 +807,9 @@
   }
 
   .modal-header {
-    display: flex;
-    justify-content:  space-between;
-    align-items:  center;
+    display:  flex;
+    justify-content:   space-between;
+    align-items:   center;
     padding: 1.5rem;
     border-bottom: 1px solid #e5e7eb;
   }
@@ -549,11 +821,11 @@
   }
 
   .modal-close {
-    background: none;
+    background:  none;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: #6b7280;
+    color:  #6b7280;
     padding: 0;
     line-height: 1;
   }
@@ -567,11 +839,11 @@
   }
 
   .modal-body {
-    padding:  1.5rem;
+    padding:   1.5rem;
   }
 
   .modal-body p {
-    margin:  0 0 0.5rem 0;
+    margin:   0 0 0.5rem 0;
     color: #374151;
   }
 
@@ -581,18 +853,18 @@
   }
 
   .form-row {
-    display: grid;
+    display:  grid;
     grid-template-columns: 1fr 1fr;
-    gap:  1rem;
+    gap:   1rem;
   }
 
   .modal-form .form-group {
-    margin-bottom:  1rem;
+    margin-bottom:   1rem;
   }
 
   .modal-form .form-group label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom:  0.5rem;
     font-weight: 500;
     color: #374151;
   }
@@ -606,68 +878,68 @@
     border-radius: 8px;
     font-size: 0.95rem;
     outline: none;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, background-color 0.3s;
   }
 
-  .modal-form .form-group input: focus,
+  .modal-form .form-group input:focus,
   .modal-form .form-group select:focus,
   .modal-form .form-group textarea:focus {
     border-color: #4169e1;
   }
 
   .modal-form .form-group textarea {
-    resize:  vertical;
+    resize:   vertical;
   }
 
   .modal-actions {
-    display: flex;
+    display:  flex;
     justify-content: flex-end;
     gap: 1rem;
-    padding:  1.5rem;
+    padding:   1.5rem;
     border-top: 1px solid #e5e7eb;
-    background: #f9fafb;
+    background:  #f9fafb;
   }
 
   .modal-form .modal-actions {
-    margin:  0 -1.5rem -1.5rem;
+    margin:   0 -1.5rem -1.5rem;
   }
 
   .btn-danger {
-    background:  #dc2626;
-    color: white;
+    background:   #dc2626;
+    color:  white;
   }
 
   .btn-danger:hover {
-    background: #b91c1c;
+    background:  #b91c1c;
   }
 
   /* Role badge styles */
   .role-badge {
-    padding: 0.3rem 0.75rem;
+    padding:  0.3rem 0.75rem;
     border-radius: 20px;
     font-size: 0.8rem;
-    font-weight:  600;
+    font-weight:   600;
     text-transform: capitalize;
   }
 
   .role-badge.admin {
-    background:  #fef3c7;
+    background:   #fef3c7;
     color: #92400e;
   }
 
   .role-badge.user {
-    background: #dbeafe;
+    background:  #dbeafe;
     color: #1e40af;
   }
 
   /* Responsive */
-  @media (max-width:  640px) {
+  @media (max-width:   640px) {
     .form-row {
       grid-template-columns: 1fr;
     }
 
     .modal {
-      margin:  1rem;
+      margin:   1rem;
       max-height: calc(100vh - 2rem);
     }
   }

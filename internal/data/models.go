@@ -29,6 +29,8 @@ type Models struct {
 		Insert(book *Book) error
 		Update(book *Book) error
 		Delete(id int) error
+		ISBNExists(isbn string) (bool, error)
+		ISBNExistsExcluding(isbn string, excludeID int) (bool, error)
 	}
 
 	BorrowRecord interface {
