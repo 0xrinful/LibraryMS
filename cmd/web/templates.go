@@ -33,6 +33,8 @@ type templateData struct {
 	TotalMembers  int
 	BooksBorrowed int
 	OverdueBooks  int
+
+	Members []*data.User
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

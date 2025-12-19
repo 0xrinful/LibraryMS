@@ -54,3 +54,14 @@ func (app *application) requireNoAuthentication(next http.Handler) http.Handler 
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (app *application) requireAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(userContextKey).(*data.User)
+		if user.Role != "admin" {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}

@@ -43,11 +43,12 @@
       </div>
 
       <div class="nav-links">
-        {{if .IsAuthenticated}}
+        {{if .IsAuthenticated}}{{if eq .User.Role "admin"}}
         <a href="/dashboard" class="nav-link">
           <i class="fas fa-tachometer-alt"></i>
           Dashboard
         </a>
+        {{end}}
         <a href="/profile" class="nav-link">
           <i class="fas fa-user"></i>
           Profile

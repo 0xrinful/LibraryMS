@@ -39,7 +39,19 @@ func (app *application) routes() http.Handler {
 		r.Post("/books/{id}/borrow", app.borrowBook)
 		r.Post("/books/{id}/return", app.returnBook)
 
-		r.Get("/dashboard", app.dashboard)
+		r.Group(func(r *rush.Router) {
+			r.Use(app.requireAdmin)
+
+			r.Get("/dashboard", app.dashboard)
+			// Dashboard book management routes
+			r.Post("/dashboard/books", app.createBook)
+			r.Post("/dashboard/books/{id}/update", app.updateBook)
+			r.Post("/dashboard/books/{id}/delete", app.deleteBook)
+
+			// Dashboard member management routes
+			r.Post("/dashboard/members/{id}/update", app.updateMember)
+			r.Post("/dashboard/members/{id}/delete", app.deleteMember)
+		})
 	})
 
 	return r

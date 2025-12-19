@@ -49,15 +49,16 @@
 
   <section class="dashboard-tabs">
     <div class="tabs">
-      <button class="tab active">Book Management</button>
-      <button class="tab">Member Management</button>
+      <button class="tab active" data-tab="books">Book Management</button>
+      <button class="tab" data-tab="members">Member Management</button>
     </div>
 
-    <div class="tab-content">
+    <!-- Book Management Tab -->
+    <div class="tab-content" id="books-tab">
       <div class="content-header">
         <h2>Books</h2>
         <div>
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" onclick="openAddBookModal()">
             <i class="fas fa-plus"></i>
             Add New Book
           </button>
@@ -89,12 +90,25 @@
                 <span class="status-badge borrowed">Borrowed</span>
                 {{end}}
               </td>
-              <td>{{.CopiesAvailable}}</td>
+              <td>{{.CopiesAvailable}} / {{.CopiesTotal}}</td>
               <td class="actions">
-                <button class="icon-btn edit">
+                <button class="icon-btn edit" onclick="openEditBookModal(this)" 
+                  data-id="{{.ID}}"
+                  data-title="{{.Title}}"
+                  data-author="{{.Author}}"
+                  data-isbn="{{.ISBN}}"
+                  data-description="{{.Description}}"
+                  data-cover="{{.CoverImage}}"
+                  data-genres="{{range $i, $g := .Genres}}{{if $i}}, {{end}}{{$g}}{{end}}"
+                  data-pages="{{.Pages}}"
+                  data-language="{{.Language}}"
+                  data-publisher="{{.Publisher}}"
+                  data-publishdate="{{.PublishDate.Format "2006-01-02"}}"
+                  data-copiestotal="{{.CopiesTotal}}"
+                  data-copiesavailable="{{.CopiesAvailable}}">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="icon-btn delete">
+                <button class="icon-btn delete" onclick="confirmDeleteBook({{.ID}}, '{{.Title}}')">
                   <i class="fas fa-trash"></i>
                 </button>
               </td>
@@ -108,6 +122,554 @@
         </table>
       </div>
     </div>
+
+    <!-- Member Management Tab -->
+    <div class="tab-content" id="members-tab" style="display: none;">
+      <div class="content-header">
+        <h2>Members</h2>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .Members}}
+            <tr>
+              <td>{{.Name}}</td>
+              <td>{{.Email}}</td>
+              <td>
+                <span class="role-badge {{.Role}}">{{.Role}}</span>
+              </td>
+              <td>{{.CreatedAt.Format "Jan 02, 2006"}}</td>
+              <td class="actions">
+                <button class="icon-btn edit" onclick="openEditMemberModal(this)"
+                  data-id="{{.ID}}"
+                  data-name="{{.Name}}"
+                  data-email="{{.Email}}"
+                  data-role="{{.Role}}">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="icon-btn delete" onclick="confirmDeleteMember({{.ID}}, '{{.Name}}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {{else}}
+            <tr>
+              <td colspan="5">No members found.</td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 </main>
+
+<!-- Add Book Modal -->
+<div class="modal-overlay" id="addBookModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Book</h3>
+      <button class="modal-close" onclick="closeModal('addBookModal')">&times;</button>
+    </div>
+    <form action="/dashboard/books" method="POST" class="modal-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="add-title">Title *</label>
+          <input type="text" id="add-title" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="add-author">Author *</label>
+          <input type="text" id="add-author" name="author" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="add-isbn">ISBN *</label>
+          <input type="text" id="add-isbn" name="isbn" required>
+        </div>
+        <div class="form-group">
+          <label for="add-copies">Total Copies *</label>
+          <input type="number" id="add-copies" name="copies_total" min="1" value="1" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="add-genres">Genres (comma separated)</label>
+          <input type="text" id="add-genres" name="genres" placeholder="Fiction, Drama, Classic">
+        </div>
+        <div class="form-group">
+          <label for="add-pages">Pages</label>
+          <input type="number" id="add-pages" name="pages" min="1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="add-language">Language</label>
+          <input type="text" id="add-language" name="language" value="English">
+        </div>
+        <div class="form-group">
+          <label for="add-publisher">Publisher</label>
+          <input type="text" id="add-publisher" name="publisher">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="add-publish-date">Publish Date</label>
+          <input type="date" id="add-publish-date" name="publish_date">
+        </div>
+        <div class="form-group">
+          <label for="add-cover">Cover Image URL</label>
+          <input type="text" id="add-cover" name="cover_image" placeholder="https://...">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="add-description">Description</label>
+        <textarea id="add-description" name="description" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('addBookModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Book</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Book Modal -->
+<div class="modal-overlay" id="editBookModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Book</h3>
+      <button class="modal-close" onclick="closeModal('editBookModal')">&times;</button>
+    </div>
+    <form id="editBookForm" method="POST" class="modal-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="edit-title">Title *</label>
+          <input type="text" id="edit-title" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-author">Author *</label>
+          <input type="text" id="edit-author" name="author" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="edit-isbn">ISBN *</label>
+          <input type="text" id="edit-isbn" name="isbn" required>
+        </div>
+        <div class="form-group">
+          <label for="edit-copies-total">Total Copies *</label>
+          <input type="number" id="edit-copies-total" name="copies_total" min="1" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="edit-copies-available">Available Copies</label>
+          <input type="number" id="edit-copies-available" name="copies_available" min="0">
+        </div>
+        <div class="form-group">
+          <label for="edit-pages">Pages</label>
+          <input type="number" id="edit-pages" name="pages" min="1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="edit-genres">Genres (comma separated)</label>
+          <input type="text" id="edit-genres" name="genres">
+        </div>
+        <div class="form-group">
+          <label for="edit-language">Language</label>
+          <input type="text" id="edit-language" name="language">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="edit-publisher">Publisher</label>
+          <input type="text" id="edit-publisher" name="publisher">
+        </div>
+        <div class="form-group">
+          <label for="edit-publish-date">Publish Date</label>
+          <input type="date" id="edit-publish-date" name="publish_date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="edit-cover">Cover Image URL</label>
+        <input type="text" id="edit-cover" name="cover_image">
+      </div>
+      <div class="form-group">
+        <label for="edit-description">Description</label>
+        <textarea id="edit-description" name="description" rows="3"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('editBookModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Book</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Book Confirmation Modal -->
+<div class="modal-overlay" id="deleteBookModal">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h3>Delete Book</h3>
+      <button class="modal-close" onclick="closeModal('deleteBookModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete "<span id="deleteBookTitle"></span>"? </p>
+      <p class="warning-text">This action cannot be undone.</p>
+    </div>
+    <form id="deleteBookForm" method="POST" class="modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('deleteBookModal')">Cancel</button>
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Member Modal -->
+<div class="modal-overlay" id="editMemberModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Member</h3>
+      <button class="modal-close" onclick="closeModal('editMemberModal')">&times;</button>
+    </div>
+    <form id="editMemberForm" method="POST" class="modal-form">
+      <div class="form-group">
+        <label for="edit-member-name">Name *</label>
+        <input type="text" id="edit-member-name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="edit-member-email">Email *</label>
+        <input type="email" id="edit-member-email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="edit-member-role">Role</label>
+        <select id="edit-member-role" name="role">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('editMemberModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Update Member</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Member Confirmation Modal -->
+<div class="modal-overlay" id="deleteMemberModal">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h3>Delete Member</h3>
+      <button class="modal-close" onclick="closeModal('deleteMemberModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Are you sure you want to delete "<span id="deleteMemberName"></span>"? </p>
+      <p class="warning-text">This action cannot be undone.</p>
+    </div>
+    <form id="deleteMemberForm" method="POST" class="modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('deleteMemberModal')">Cancel</button>
+      <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      // Add active class to clicked tab
+      this.classList.add('active');
+      
+      // Hide all tab contents
+      document.getElementById('books-tab').style.display = 'none';
+      document.getElementById('members-tab').style.display = 'none';
+      
+      // Show selected tab content
+      const tabName = this.getAttribute('data-tab');
+      document.getElementById(tabName + '-tab').style.display = 'block';
+    });
+  });
+
+  // Modal functions
+  function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // Book functions
+  function openAddBookModal() {
+    document.querySelector('#addBookModal form').reset();
+    openModal('addBookModal');
+  }
+
+  function openEditBookModal(button) {
+    const id = button.getAttribute('data-id');
+    const title = button.getAttribute('data-title');
+    const author = button.getAttribute('data-author');
+    const isbn = button.getAttribute('data-isbn');
+    const description = button.getAttribute('data-description');
+    const cover = button.getAttribute('data-cover');
+    const genres = button.getAttribute('data-genres');
+    const pages = button.getAttribute('data-pages');
+    const language = button.getAttribute('data-language');
+    const publisher = button.getAttribute('data-publisher');
+    const publishDate = button.getAttribute('data-publishdate');
+    const copiesTotal = button.getAttribute('data-copiestotal');
+    const copiesAvailable = button.getAttribute('data-copiesavailable');
+
+    document.getElementById('editBookForm').action = '/dashboard/books/' + id + '/update';
+    document.getElementById('edit-title').value = title;
+    document.getElementById('edit-author').value = author;
+    document.getElementById('edit-isbn').value = isbn;
+    document.getElementById('edit-description').value = description;
+    document.getElementById('edit-cover').value = cover;
+    document.getElementById('edit-genres').value = genres;
+    document.getElementById('edit-pages').value = pages;
+    document.getElementById('edit-language').value = language;
+    document.getElementById('edit-publisher').value = publisher;
+    document.getElementById('edit-publish-date').value = publishDate;
+    document.getElementById('edit-copies-total').value = copiesTotal;
+    document.getElementById('edit-copies-available').value = copiesAvailable;
+
+    openModal('editBookModal');
+  }
+
+  function confirmDeleteBook(id, title) {
+    document.getElementById('deleteBookTitle').textContent = title;
+    document.getElementById('deleteBookForm').action = '/dashboard/books/' + id + '/delete';
+    openModal('deleteBookModal');
+  }
+
+  // Member functions
+  function openEditMemberModal(button) {
+    const id = button.getAttribute('data-id');
+    const name = button.getAttribute('data-name');
+    const email = button.getAttribute('data-email');
+    const role = button.getAttribute('data-role');
+
+    document.getElementById('editMemberForm').action = '/dashboard/members/' + id + '/update';
+    document.getElementById('edit-member-name').value = name;
+    document.getElementById('edit-member-email').value = email;
+    document.getElementById('edit-member-role').value = role;
+
+    openModal('editMemberModal');
+  }
+
+  function confirmDeleteMember(id, name) {
+    document.getElementById('deleteMemberName').textContent = name;
+    document.getElementById('deleteMemberForm').action = '/dashboard/members/' + id + '/delete';
+    openModal('deleteMemberModal');
+  }
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+        modal.classList.remove('active');
+      });
+      document.body.style.overflow = '';
+    }
+  });
+</script>
+
+<style>
+  /* Modal Styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:  rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .modal.modal-small {
+    max-width: 400px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content:  space-between;
+    align-items:  center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1f2937;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .modal-close:hover {
+    color: #1f2937;
+  }
+
+  .modal-form {
+    padding: 1.5rem;
+  }
+
+  .modal-body {
+    padding:  1.5rem;
+  }
+
+  .modal-body p {
+    margin:  0 0 0.5rem 0;
+    color: #374151;
+  }
+
+  .warning-text {
+    color: #dc2626 !important;
+    font-size: 0.9rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap:  1rem;
+  }
+
+  .modal-form .form-group {
+    margin-bottom:  1rem;
+  }
+
+  .modal-form .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  .modal-form .form-group input,
+  .modal-form .form-group select,
+  .modal-form .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .modal-form .form-group input: focus,
+  .modal-form .form-group select:focus,
+  .modal-form .form-group textarea:focus {
+    border-color: #4169e1;
+  }
+
+  .modal-form .form-group textarea {
+    resize:  vertical;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding:  1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+
+  .modal-form .modal-actions {
+    margin:  0 -1.5rem -1.5rem;
+  }
+
+  .btn-danger {
+    background:  #dc2626;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #b91c1c;
+  }
+
+  /* Role badge styles */
+  .role-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight:  600;
+    text-transform: capitalize;
+  }
+
+  .role-badge.admin {
+    background:  #fef3c7;
+    color: #92400e;
+  }
+
+  .role-badge.user {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  /* Responsive */
+  @media (max-width:  640px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .modal {
+      margin:  1rem;
+      max-height: calc(100vh - 2rem);
+    }
+  }
+</style>
 {{end}}

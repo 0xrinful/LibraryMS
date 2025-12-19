@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/0xrinful/LibraryMS/internal/data"
 	"github.com/0xrinful/LibraryMS/internal/validator"
@@ -52,6 +54,7 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 
+	// Get total books count
 	totalBooks, err := app.models.Books.Count()
 	if err != nil {
 		app.serverError(w, err)
@@ -59,6 +62,7 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.TotalBooks = totalBooks
 
+	// Get total members count
 	totalMembers, err := app.models.Users.Count()
 	if err != nil {
 		app.serverError(w, err)
@@ -66,6 +70,7 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.TotalMembers = totalMembers
 
+	// Get books borrowed (active borrows) count
 	booksBorrowed, err := app.models.BorrowRecord.CountActiveBorrows()
 	if err != nil {
 		app.serverError(w, err)
@@ -73,6 +78,7 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.BooksBorrowed = booksBorrowed
 
+	// Get overdue books count
 	overdueBooks, err := app.models.BorrowRecord.CountOverdue()
 	if err != nil {
 		app.serverError(w, err)
@@ -80,12 +86,21 @@ func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 	data.OverdueBooks = overdueBooks
 
+	// Get all books for the table
 	books, err := app.models.Books.GetAll()
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 	data.Books = books
+
+	// Get all members for the table
+	members, err := app.models.Users.GetAll()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	data.Members = members
 
 	app.render(w, 200, "dashboard.html", data)
 }
@@ -396,4 +411,287 @@ func (app *application) booksFragment(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Books = books
 	app.renderPartial(w, "book_cards.html", data)
+}
+
+// Dashboard Book Handlers
+
+type bookForm struct {
+	Title       string
+	Author      string
+	ISBN        string
+	Description string
+	CoverImage  string
+	Genres      string
+	Pages       int
+	Language    string
+	Publisher   string
+	PublishDate string
+	CopiesTotal int
+	validator.Validator
+}
+
+func (app *application) createBook(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.badRequest(w, r)
+		return
+	}
+
+	pages, _ := strconv.Atoi(r.FormValue("pages"))
+	copiesTotal, _ := strconv.Atoi(r.FormValue("copies_total"))
+
+	form := bookForm{
+		Title:       r.FormValue("title"),
+		Author:      r.FormValue("author"),
+		ISBN:        r.FormValue("isbn"),
+		Description: r.FormValue("description"),
+		CoverImage:  r.FormValue("cover_image"),
+		Genres:      r.FormValue("genres"),
+		Pages:       pages,
+		Language:    r.FormValue("language"),
+		Publisher:   r.FormValue("publisher"),
+		PublishDate: r.FormValue("publish_date"),
+		CopiesTotal: copiesTotal,
+		Validator:   *validator.New(),
+	}
+
+	form.Check(validator.NotBlank(form.Title), "title", "must be provided")
+	form.Check(validator.NotBlank(form.Author), "author", "must be provided")
+	form.Check(validator.NotBlank(form.ISBN), "isbn", "must be provided")
+	form.Check(form.CopiesTotal >= 1, "copies_total", "must be at least 1")
+
+	if !form.Valid() {
+		app.flashError(r, "Please fill in all required fields correctly.")
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+
+	publishDate, err := time.Parse("2006-01-02", form.PublishDate)
+	if err != nil {
+		publishDate = time.Now()
+	}
+
+	// Parse genres from comma-separated string
+	var genres []string
+	if form.Genres != "" {
+		for _, g := range splitAndTrim(form.Genres) {
+			if g != "" {
+				genres = append(genres, g)
+			}
+		}
+	}
+
+	book := &data.Book{
+		Title:           form.Title,
+		Author:          form.Author,
+		ISBN:            form.ISBN,
+		Description:     form.Description,
+		CoverImage:      form.CoverImage,
+		Genres:          genres,
+		Pages:           form.Pages,
+		Language:        form.Language,
+		Publisher:       form.Publisher,
+		PublishDate:     publishDate,
+		CopiesTotal:     form.CopiesTotal,
+		CopiesAvailable: form.CopiesTotal,
+	}
+
+	err = app.models.Books.Insert(book)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.flashInfo(r, "Book added successfully.")
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+func (app *application) updateBook(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		app.notFound(w, r)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.badRequest(w, r)
+		return
+	}
+
+	// Get existing book
+	book, err := app.models.Books.GetBookByID(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFound(w, r)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	pages, _ := strconv.Atoi(r.FormValue("pages"))
+	copiesTotal, _ := strconv.Atoi(r.FormValue("copies_total"))
+	copiesAvailable, _ := strconv.Atoi(r.FormValue("copies_available"))
+
+	publishDate, err := time.Parse("2006-01-02", r.FormValue("publish_date"))
+	if err != nil {
+		publishDate = book.PublishDate
+	}
+
+	// Parse genres from comma-separated string
+	var genres []string
+	genresStr := r.FormValue("genres")
+	if genresStr != "" {
+		for _, g := range splitAndTrim(genresStr) {
+			if g != "" {
+				genres = append(genres, g)
+			}
+		}
+	}
+
+	book.Title = r.FormValue("title")
+	book.Author = r.FormValue("author")
+	book.ISBN = r.FormValue("isbn")
+	book.Description = r.FormValue("description")
+	book.CoverImage = r.FormValue("cover_image")
+	book.Genres = genres
+	book.Pages = pages
+	book.Language = r.FormValue("language")
+	book.Publisher = r.FormValue("publisher")
+	book.PublishDate = publishDate
+	book.CopiesTotal = copiesTotal
+	book.CopiesAvailable = copiesAvailable
+
+	err = app.models.Books.Update(book)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFound(w, r)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.flashInfo(r, "Book updated successfully.")
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+func (app *application) deleteBook(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		app.notFound(w, r)
+		return
+	}
+
+	err = app.models.Books.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFound(w, r)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.flashInfo(r, "Book deleted successfully.")
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+// Dashboard Member Handlers
+
+func (app *application) updateMember(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id < 1 {
+		app.notFound(w, r)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.badRequest(w, r)
+		return
+	}
+
+	// Get existing user
+	user, err := app.models.Users.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFound(w, r)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	user.Name = r.FormValue("name")
+	user.Email = r.FormValue("email")
+	user.Role = r.FormValue("role")
+
+	err = app.models.Users.Update(user)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFound(w, r)
+		case errors.Is(err, data.ErrDuplicateEmail):
+			app.flashError(r, "Email address already in use.")
+			http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.flashInfo(r, "Member updated successfully.")
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+func (app *application) deleteMember(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id < 1 {
+		app.notFound(w, r)
+		return
+	}
+
+	// Prevent deleting yourself
+	currentUserID := app.session.GetInt64(r.Context(), "authenticatedUserID")
+	if currentUserID == id {
+		app.flashError(r, "You cannot delete your own account.")
+		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+		return
+	}
+
+	err = app.models.Users.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFound(w, r)
+		default:
+			app.serverError(w, err)
+		}
+		return
+	}
+
+	app.flashInfo(r, "Member deleted successfully.")
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+
+// Helper function
+func splitAndTrim(s string) []string {
+	var result []string
+	for _, part := range strings.Split(s, ",") {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }

@@ -169,3 +169,86 @@ func (m UserModel) Count() (int, error) {
 	}
 	return count, nil
 }
+
+func (m UserModel) GetAll() ([]*User, error) {
+	query := `
+		SELECT id, created_at, name, email, role
+		FROM users
+		ORDER BY created_at DESC`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		var u User
+		if err := rows.Scan(&u.ID, &u.CreatedAt, &u.Name, &u.Email, &u.Role); err != nil {
+			return nil, err
+		}
+		users = append(users, &u)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (m UserModel) Update(user *User) error {
+	query := `
+		UPDATE users 
+		SET name = $1, email = $2, role = $3, version = version + 1
+		WHERE id = $4
+		RETURNING version`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{user.Name, user.Email, user.Role, user.ID}
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrRecordNotFound
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		default:
+			return err
+		}
+	}
+	return nil
+}
+
+func (m UserModel) Delete(id int64) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+
+	query := `DELETE FROM users WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
+	return nil
+}

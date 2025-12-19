@@ -309,3 +309,97 @@ func (m BookModel) GetAll() ([]*Book, error) {
 
 	return books, nil
 }
+
+func (m BookModel) Insert(book *Book) error {
+	query := `
+		INSERT INTO books (title, author, publish_date, isbn, description, cover_image, genres, pages, language, publisher, copies_total, copies_available)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		RETURNING id, version`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{
+		book.Title,
+		book.Author,
+		book.PublishDate,
+		book.ISBN,
+		book.Description,
+		book.CoverImage,
+		pq.Array(book.Genres),
+		book.Pages,
+		book.Language,
+		book.Publisher,
+		book.CopiesTotal,
+		book.CopiesAvailable,
+	}
+
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&book.ID, &book.Version)
+}
+
+func (m BookModel) Update(book *Book) error {
+	query := `
+		UPDATE books
+		SET title = $1, author = $2, publish_date = $3, isbn = $4, description = $5, 
+		    cover_image = $6, genres = $7, pages = $8, language = $9, publisher = $10, 
+		    copies_total = $11, copies_available = $12, version = version + 1
+		WHERE id = $13
+		RETURNING version`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	args := []any{
+		book.Title,
+		book.Author,
+		book.PublishDate,
+		book.ISBN,
+		book.Description,
+		book.CoverImage,
+		pq.Array(book.Genres),
+		book.Pages,
+		book.Language,
+		book.Publisher,
+		book.CopiesTotal,
+		book.CopiesAvailable,
+		book.ID,
+	}
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&book.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrRecordNotFound
+		default:
+			return err
+		}
+	}
+	return nil
+}
+
+func (m BookModel) Delete(id int) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+
+	query := `DELETE FROM books WHERE id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := m.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
+	return nil
+}

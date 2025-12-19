@@ -13,6 +13,9 @@ type Models struct {
 		GetByEmail(email string) (*User, error)
 		Get(id int64) (*User, error)
 		Count() (int, error)
+		GetAll() ([]*User, error)
+		Update(user *User) error
+		Delete(id int64) error
 	}
 
 	Books interface {
@@ -23,6 +26,9 @@ type Models struct {
 		Search(q, category, availability, sort string) ([]*Book, error)
 		Count() (int, error)
 		GetAll() ([]*Book, error)
+		Insert(book *Book) error
+		Update(book *Book) error
+		Delete(id int) error
 	}
 
 	BorrowRecord interface {
