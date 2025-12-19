@@ -12,7 +12,7 @@
       </div>
       <div class="stat-info">
         <h3>Total Books</h3>
-        <p class="stat-number">1,234</p>
+        <p class="stat-number">{{.TotalBooks}}</p>
       </div>
     </div>
 
@@ -22,7 +22,7 @@
       </div>
       <div class="stat-info">
         <h3>Active Members</h3>
-        <p class="stat-number">456</p>
+        <p class="stat-number">{{.TotalMembers}}</p>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
       </div>
       <div class="stat-info">
         <h3>Books Borrowed</h3>
-        <p class="stat-number">89</p>
+        <p class="stat-number">{{.BooksBorrowed}}</p>
       </div>
     </div>
 
@@ -42,7 +42,7 @@
       </div>
       <div class="stat-info">
         <h3>Overdue Books</h3>
-        <p class="stat-number">12</p>
+        <p class="stat-number">{{.OverdueBooks}}</p>
       </div>
     </div>
   </section>
@@ -77,12 +77,19 @@
             </tr>
           </thead>
           <tbody>
+            {{range .Books}}
             <tr>
-              <td>To Kill a Mockingbird</td>
-              <td>Harper Lee</td>
-              <td>978-0061120084</td>
-              <td><span class="status-badge available">Available</span></td>
-              <td>3</td>
+              <td>{{.Title}}</td>
+              <td>{{.Author}}</td>
+              <td>{{.ISBN}}</td>
+              <td>
+                {{if gt .CopiesAvailable 0}}
+                <span class="status-badge available">Available</span>
+                {{else}}
+                <span class="status-badge borrowed">Borrowed</span>
+                {{end}}
+              </td>
+              <td>{{.CopiesAvailable}}</td>
               <td class="actions">
                 <button class="icon-btn edit">
                   <i class="fas fa-edit"></i>
@@ -92,51 +99,11 @@
                 </button>
               </td>
             </tr>
+            {{else}}
             <tr>
-              <td>1984</td>
-              <td>George Orwell</td>
-              <td>978-0451524935</td>
-              <td><span class="status-badge available">Available</span></td>
-              <td>5</td>
-              <td class="actions">
-                <button class="icon-btn edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="icon-btn delete">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
+              <td colspan="6">No books found.</td>
             </tr>
-            <tr>
-              <td>Pride and Prejudice</td>
-              <td>Jane Austen</td>
-              <td>978-0141439518</td>
-              <td><span class="status-badge borrowed">Borrowed</span></td>
-              <td>0</td>
-              <td class="actions">
-                <button class="icon-btn edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="icon-btn delete">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-            <tr>
-              <td>The Great Gatsby</td>
-              <td>F. Scott Fitzgerald</td>
-              <td>978-0743273565</td>
-              <td><span class="status-badge available">Available</span></td>
-              <td>2</td>
-              <td class="actions">
-                <button class="icon-btn edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="icon-btn delete">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
+            {{end}}
           </tbody>
         </table>
       </div>

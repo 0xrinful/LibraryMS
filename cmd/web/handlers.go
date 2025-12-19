@@ -51,6 +51,42 @@ func (app *application) profile(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
+
+	totalBooks, err := app.models.Books.Count()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	data.TotalBooks = totalBooks
+
+	totalMembers, err := app.models.Users.Count()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	data.TotalMembers = totalMembers
+
+	booksBorrowed, err := app.models.BorrowRecord.CountActiveBorrows()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	data.BooksBorrowed = booksBorrowed
+
+	overdueBooks, err := app.models.BorrowRecord.CountOverdue()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	data.OverdueBooks = overdueBooks
+
+	books, err := app.models.Books.GetAll()
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	data.Books = books
+
 	app.render(w, 200, "dashboard.html", data)
 }
 

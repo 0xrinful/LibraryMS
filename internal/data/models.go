@@ -12,6 +12,7 @@ type Models struct {
 		Insert(user *User) error
 		GetByEmail(email string) (*User, error)
 		Get(id int64) (*User, error)
+		Count() (int, error)
 	}
 
 	Books interface {
@@ -20,11 +21,15 @@ type Models struct {
 		BorrowBook(userID, bookID int64, days int) error
 		ReturnBook(userID, bookID int64) error
 		Search(q, category, availability, sort string) ([]*Book, error)
+		Count() (int, error)
+		GetAll() ([]*Book, error)
 	}
 
 	BorrowRecord interface {
 		GetCurrentBorrows(userID int64) ([]*BorrowedBook, error)
 		GetBorrowHistory(userID int64) ([]*BorrowedBook, error)
+		CountActiveBorrows() (int, error)
+		CountOverdue() (int, error)
 	}
 }
 

@@ -70,3 +70,25 @@ func (m BorrowRecordModel) GetBorrowHistory(userID int64) ([]*BorrowedBook, erro
 	}
 	return history, nil
 }
+
+func (m BorrowRecordModel) CountActiveBorrows() (int, error) {
+	query := `SELECT COUNT(*) FROM borrow_records WHERE returned_at IS NULL`
+
+	var count int
+	err := m.DB.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (m BorrowRecordModel) CountOverdue() (int, error) {
+	query := `SELECT COUNT(*) FROM borrow_records WHERE returned_at IS NULL AND due_at < NOW()`
+
+	var count int
+	err := m.DB.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

@@ -155,3 +155,17 @@ func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 	v.Check(len(password) >= 8, "password", "must be at least 8 bytes long")
 	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
 }
+
+func (m UserModel) Count() (int, error) {
+	query := `SELECT COUNT(*) FROM users`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var count int
+	err := m.DB.QueryRowContext(ctx, query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}

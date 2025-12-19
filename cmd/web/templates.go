@@ -28,6 +28,11 @@ type templateData struct {
 	SearchCategory     string
 	SearchAvailability string
 	SearchSort         string
+
+	TotalBooks    int
+	TotalMembers  int
+	BooksBorrowed int
+	OverdueBooks  int
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
