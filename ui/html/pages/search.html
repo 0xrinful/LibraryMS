@@ -62,7 +62,9 @@
               {{end}}
             </div>
             <div class="book-info">
-              <span class="book-category">{{index .Genres 0}}</span>
+              {{range .Genres}}
+              <span class="book-category">{{.}}</span>
+              {{end}}
               <h3 class="book-title">{{.Title}}</h3>
               <p class="book-author">by {{.Author}}</p>
               <a href="/books/{{.ID}}" class="btn btn-primary">View Details</a>
